@@ -1,3 +1,4 @@
+using System.Configuration;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Uttom.Domain.Interfaces.Abstractions;
@@ -20,7 +21,7 @@ public static class DependencyInjection
             .RegisterRepositories()
             .RegisterDBContext(configuration)
             .RegisterMediatR()
-            .RegisterBus()
+            .RegisterBus(configuration)
             .RegisterServices()
             .RegisterSwagger();
 
@@ -56,15 +57,17 @@ public static class DependencyInjection
         return services;
     }
 
-    private static IServiceCollection RegisterBus(this IServiceCollection services)
+    private static IServiceCollection RegisterBus(this IServiceCollection services, IConfiguration configuration)
     {
+        var rabbitMqConnectionString = configuration.GetConnectionString("RabbitMQ");
+
         services.AddMassTransit(x =>
         {
             x.AddConsumer<RegisteredMotorcycleConsumer>();
 
             x.UsingRabbitMq((context, cfg) =>
             {
-                cfg.Host("localhost", "/", h =>
+                cfg.Host(new Uri(rabbitMqConnectionString!),  h =>
                 {
                     h.Username("guest");
                     h.Password("guest");

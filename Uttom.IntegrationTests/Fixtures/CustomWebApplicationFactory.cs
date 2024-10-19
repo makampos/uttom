@@ -10,13 +10,13 @@ using Uttom.Infrastructure.Implementations;
 
 namespace Uttom.IntegrationTests.Fixtures;
 
-public abstract class CustomWebApplicationFactory : WebApplicationFactory<Program>
+public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
     private readonly PostgreSqlContainer _postgresContainer;
     private readonly RabbitMqContainer _rabbitMqContainer;
     private readonly MinioContainer _minioContainer;
 
-    protected CustomWebApplicationFactory()
+    public CustomWebApplicationFactory()
     {
         _postgresContainer = new PostgreSqlBuilder()
             .WithDatabase("uttomdb")

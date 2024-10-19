@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations;
+using System.Text.Json.Serialization;
 
 namespace Uttom.Domain.Models;
 
 public class Motorcycle : TrackableEntity
 {
+    [JsonConstructor]
     private Motorcycle(string identifier, int year, string model, string plateNumber)
     {
         Identifier = identifier;

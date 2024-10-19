@@ -22,12 +22,6 @@ public class ReadOnlyRepository<TEntity>(
             .Take(pageSize)
             .ToListAsync(cancellationToken);
 
-        return  new PagedResult<TEntity>
-        {
-            Items = items,
-            TotalCount = totalCount,
-            PageSize = pageSize,
-            CurrentPage = pageNumber
-        };
+        return  new PagedResult<TEntity>(items, totalCount, pageSize, pageNumber);
     }
 }

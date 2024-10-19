@@ -1,7 +1,18 @@
+using System.Text.Json.Serialization;
+
 namespace Uttom.Domain.Results;
 
 public class PagedResult<T>
 {
+    [JsonConstructor]
+    public PagedResult(IReadOnlyList<T>? items, int totalCount, int pageSize, int currentPage)
+    {
+        Items = items;
+        TotalCount = totalCount;
+        PageSize = pageSize;
+        CurrentPage = currentPage;
+    }
+
     public IReadOnlyList<T>? Items { get; set; }
     public int TotalCount { get; set; }
     public int PageSize { get; set; }

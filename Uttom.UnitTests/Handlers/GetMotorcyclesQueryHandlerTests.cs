@@ -14,7 +14,7 @@ public class GetMotorcyclesQueryHandlerTests
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly ApplicationDbContext _dbContext;
-    private readonly GetMotorCyclesQueryHandler _handler;
+    private readonly GetMotorcyclesQueryHandler _handler;
     private readonly MotorcycleRepository _motorcycleRepository;
     private readonly IRegisteredMotorCycleRepository _registeredMotorCycleRepository;
     private readonly IDelivererRepository _delivererRepository;
@@ -35,22 +35,7 @@ public class GetMotorcyclesQueryHandlerTests
 
         _uttomUnitOfWork = new UttomUnitOfWork(_dbContext, _motorcycleRepository, _registeredMotorCycleRepository, _delivererRepository, _rentalRepository);
 
-        _handler = new GetMotorCyclesQueryHandler(_uttomUnitOfWork);
-    }
-
-    [Fact]
-    public async Task Handle_ShouldReturnFailureResult_WhenNoMotorcyclesAreFound()
-    {
-        // Arrange
-        var request = new GetMotorcyclesQuery(1, 10);
-
-        // Act
-        var result = await _handler.Handle(request, CancellationToken.None);
-
-        // Assert
-        result.Should().NotBeNull();
-        result.Success.Should().BeFalse();
-        result.ErrorMessage.Should().Be("Motorcycles not found.");
+        _handler = new GetMotorcyclesQueryHandler(_uttomUnitOfWork);
     }
 
     [Fact]

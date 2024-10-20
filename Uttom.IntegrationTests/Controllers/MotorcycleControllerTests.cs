@@ -200,6 +200,8 @@ public class MotorcycleControllerTests : IClassFixture<CustomWebApplicationFacto
         result.Should().Be("Motorcycle not found.");
     }
 
+    //TODO: Add test for when motorcycle has rental record
+
 
     //TODO: Refactor to get message by plate number
     private async Task<PagedResult<RegisteredMotorcycle>> CheckMessageConsumedAsync()

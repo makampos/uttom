@@ -36,6 +36,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         // Initialize Minio container
         _minioContainer = new MinioBuilder()
             .WithImage("minio/minio")
+            .WithPortBinding(9000)
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(9000))
+            .WithEnvironment("MINIO_ACCESS_KEY", "minioadmin")
+            .WithEnvironment("MINIO_SECRET_KEY", "minioadmin")
             .Build();
     }
 

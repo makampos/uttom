@@ -81,6 +81,7 @@ public class MotorcycleController : ControllerBase
     [SwaggerOperation("Delete a motorcycle by id")]
     [SwaggerResponse(StatusCodes.Status200OK, "Motorcycle deleted", typeof(Motorcycle))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Motorcycle not found")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Motorcycle has rental record")]
     public async Task<IActionResult> DeleteMotorcycleById([FromRoute] DeleteMotorcycleCommand command)
     {
         var result = await _mediator.Send(command);

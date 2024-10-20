@@ -2,7 +2,7 @@ using System.Text.RegularExpressions;
 using Uttom.Domain.Interfaces.Abstractions;
 
 namespace Uttom.Domain.Interfaces.Services;
-
+// TODO: Add a wrapper response instead a validation boolean directly
 public class ImageService : IImageService
 {
     public bool ValidateImageExtension(string base64ImageData)

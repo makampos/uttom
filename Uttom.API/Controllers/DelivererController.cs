@@ -29,4 +29,21 @@ public class DelivererController : ControllerBase
             ? BadRequest(new { message = result.ErrorMessage })
             : CreatedAtAction(null, null);
     }
+
+    [HttpPost("{id}/driver-license")]
+    [SwaggerOperation("Upload driver license image")]
+    [SwaggerResponse(StatusCodes.Status201Created)]
+    [SwaggerResponse(StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadDriverLicenseImage([FromRoute] int id, [FromBody] AddDriverLicenseCommand command)
+    {
+        var commandWithDriverId = command.DelivererId.HasValue
+            ? command
+            : command.AddDelivererId(id);
+
+        var result = await _mediator.Send(commandWithDriverId);
+
+        return !result.Success
+            ? BadRequest(new { message = result.ErrorMessage })
+            : CreatedAtAction(null, null);
+    }
 }

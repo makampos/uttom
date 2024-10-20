@@ -161,6 +161,63 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         var deliverer = await scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>()
             .DelivererRepository.GetDelivererByBusinessTaxIdAsync(command.BusinessTaxId);
 
-        scope.ServiceProvider.GetRequiredService<IMinioService>().GetImageAsync(deliverer!.DriverLicenseImageId).Should().NotBeNull();
+        scope.ServiceProvider.GetRequiredService<IMinioService>().GetImageAsync(deliverer!.DriverLicenseImageId!).Should().NotBeNull();
+    }
+
+    [Fact]
+    public async Task UploadDriverLicenseImage_Should_Return_Created_When_Successful()
+    {
+        // Arrange
+        var command = new AddDelivererCommand(
+            "MM",
+            "Matheus",
+            "20.681.653/0001-90",
+            new DateTime(1990, 1, 1),
+            "123456789",
+            1,
+            null);
+        var response = await _client.PostAsJsonAsync("/api/deliverers", command);
+        response.EnsureSuccessStatusCode();
+
+        var deliverer = await _factory.Server.Services.CreateScope().ServiceProvider.GetRequiredService<IUttomUnitOfWork>()
+            .DelivererRepository.GetDelivererByBusinessTaxIdAsync(command.BusinessTaxId);
+
+        var driverLicenseCommand = new AddDriverLicenseCommand(StringExtensions.ConvertToBase64($"{PATH}/cnh.png"), deliverer!.Id);
+
+        // Act
+        var responseUploadImage = await _client.PostAsJsonAsync($"/api/deliverers/{deliverer.Id}/driver-license", driverLicenseCommand);
+
+        // Assert
+        responseUploadImage.EnsureSuccessStatusCode();
+        responseUploadImage.StatusCode.Should().Be(HttpStatusCode.Created);
+    }
+
+    [Fact]
+    public async Task UploadDriverLicenseImage_Should_Return_BadRequest_When_Invalid_Image_Extension()
+    {
+        // Arrange
+        var command = new AddDelivererCommand(
+            "MM",
+            "Matheus",
+            "20.681.653/0001-90",
+            new DateTime(1990, 1, 1),
+            "123456789",
+            1,
+            null);
+        var response = await _client.PostAsJsonAsync("/api/deliverers", command);
+        response.EnsureSuccessStatusCode();
+
+        var deliverer = await _factory.Server.Services.CreateScope().ServiceProvider.GetRequiredService<IUttomUnitOfWork>()
+            .DelivererRepository.GetDelivererByBusinessTaxIdAsync(command.BusinessTaxId);
+
+        var driverLicenseCommand = new AddDriverLicenseCommand(StringExtensions.ConvertToBase64($"{PATH}/cnh.jpeg"), deliverer!.Id);
+
+        // Act
+        var responseUploadImage = await _client.PostAsJsonAsync($"/api/deliverers/{deliverer.Id}/driver-license", driverLicenseCommand);
+        var result = await responseUploadImage.Content.ReadAsStringAsync();
+
+        // Assert
+        responseUploadImage.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+        result.Should().Contain("The image extension is not valid.");
     }
 }

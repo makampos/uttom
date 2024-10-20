@@ -19,6 +19,7 @@ public class AddRentalCommandHandler : IRequestHandler<AddRentalCommand, ResultR
     public async Task<ResultResponse<bool>> Handle(AddRentalCommand command, CancellationToken cancellationToken)
     {
         // get plan
+        // TODO: Add Validator on API level to check this
         var plan = RentalPlans.GetPlan(command.PlanId);
 
         if (plan is null)
@@ -27,6 +28,7 @@ public class AddRentalCommandHandler : IRequestHandler<AddRentalCommand, ResultR
         }
 
         // can not rent using past date
+        // TODO: Add Validator on API level to check this
         if (command.StartDate <= DateOnly.FromDateTime(DateTime.Now).AddDays(-1))
         {
             return ResultResponse<bool>.FailureResult("The start date must be today or a future date.");

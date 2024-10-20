@@ -3,6 +3,7 @@ using System.Text.Json.Serialization;
 namespace Uttom.Application.DTOs;
 
 public record RentalDto(
+    [property: JsonPropertyName("id")] int Id,
     [property: JsonPropertyName("identificador")] string Identifier,
     [property: JsonPropertyName("valor_diaria")] decimal DailyRate,
     [property: JsonPropertyName("entregador_id")] int DelivererId,

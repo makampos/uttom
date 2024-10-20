@@ -34,8 +34,15 @@ public class Rental : TrackableEntity
     [Required]
     public int MotorcycleId { get; private set; }
 
+    public DateOnly? ReturnDate { get; private set; } = null;
+
     public static Rental Create(int planId, DateOnly endDate, DateOnly estimatingEndingDate, int delivererId, int motorcycleId)
     {
         return new Rental(planId, endDate, estimatingEndingDate, delivererId, motorcycleId);
+    }
+
+    public void UpdateReturnDate(DateOnly returnDate)
+    {
+        ReturnDate = returnDate;
     }
 }

@@ -8,7 +8,8 @@ public static class Mappers
     public static RentalDto ToDto(this Rental rental, decimal dailyRate)
     {
         return new RentalDto(
-            rental.Motorcycle.Identifier,
+            rental.Id,
+            string.Empty, // choose which identifier to use, motorcycle, deliverer or it is own Rental identifier?
             dailyRate,
             rental.DelivererId,
             rental.MotorcycleId,

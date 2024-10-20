@@ -115,6 +115,61 @@ public class RentalControllerTests : IClassFixture<CustomWebApplicationFactory>
         result.Should().NotBeNull();
     }
 
+    [Fact]
+    public async Task AddReturnDate_Should_Return_Ok_When_Successful()
+    {
+        // Arrange
+        var motorcycleCommand = new AddMotorcycleCommand(
+            Identifier: "ID1234",
+            Year: 2023,
+            Model: "ModelX",
+            PlateNumber: "ABC-1234");
+
+        var motorcycleResponse = await _client.PostAsJsonAsync("/api/motorcycles", motorcycleCommand);
+        motorcycleResponse.EnsureSuccessStatusCode();
+
+        var delivererCommand = new AddDelivererCommand(
+            "MM",
+            "Matheus",
+            "20.681.653/0001-90",
+            new DateTime(1990, 1, 1),
+            "123456789",
+            1,
+            null);
+
+        var delivererResponse = await _client.PostAsJsonAsync("/api/deliverers", delivererCommand);
+        delivererResponse.EnsureSuccessStatusCode();
+
+        var motorcycle = await GetMotorcycle(motorcycleCommand.PlateNumber);
+        var deliverer = await GetDeliverer(delivererCommand.BusinessTaxId);
+
+        var command = new AddRentalCommand(
+            PlanId: RentalPlans.GetPlan(7)!.Days,
+            DeliverId: deliverer.Id,
+            MotorcycleId: motorcycle.Id,
+            StartDate: DateOnly.FromDateTime(DateTime.Today),
+            EstimatingEndingDate: DateOnly.FromDateTime(DateTime.Today.AddDays(8)));
+
+        var response = await _client.PostAsJsonAsync("/api/rentals", command);
+        response.EnsureSuccessStatusCode();
+
+        var rental = await _client.GetAsync($"/api/rentals/{1}");
+        rental.EnsureSuccessStatusCode();
+
+        var rentalDTo = await rental.Content.ReadFromJsonAsync<RentalDto>();
+
+        var updateCommand = new UpdateRentalCommand(rentalDTo!.EndDate);
+
+        // Act
+        var updateResponse = await _client.PutAsJsonAsync($"/api/rentals/{rentalDTo.Id}/return", updateCommand);
+        var updateResult = await updateResponse.Content.ReadAsStringAsync();
+
+        // Assert
+        updateResponse.EnsureSuccessStatusCode();
+        updateResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        updateResult.Should().NotBeNullOrEmpty();
+    }
+
     // TODO: Add more tests to cover all scenarios such as BadRequest and NotFound
 
     // DbExtension Methods
@@ -134,5 +189,4 @@ public class RentalControllerTests : IClassFixture<CustomWebApplicationFactory>
         var uttomUnitOfWork = scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>();
         return await uttomUnitOfWork.DelivererRepository.GetDelivererByBusinessTaxIdAsync(businessTaxId);
     }
-
 }

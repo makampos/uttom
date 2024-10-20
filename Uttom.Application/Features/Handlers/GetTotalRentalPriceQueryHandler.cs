@@ -26,9 +26,15 @@ public class GetTotalRentalPriceQueryHandler : IRequestHandler<CalculateTotalRen
             return ResultResponse<decimal>.FailureResult("Rental not found.");
         }
 
+        // TODO: Add test for this scenario
+        if (request.ActualReturnDate < rental.StartDate)
+        {
+            return ResultResponse<decimal>.FailureResult("Actual return date cannot be before the rental start date.");
+        }
+
         var plan = RentalPlans.GetPlan(rental.PlanId);
 
-        if ( plan is null)
+        if (plan is null)
         {
             return ResultResponse<decimal>.FailureResult("Plan not found.");
         }

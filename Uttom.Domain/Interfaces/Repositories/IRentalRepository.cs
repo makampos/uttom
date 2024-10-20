@@ -5,4 +5,5 @@ namespace Uttom.Domain.Interfaces.Repositories;
 public interface IRentalRepository : IRepository<Rental>
 {
     Task<Rental?> GetByMotorcycleIdAsync(int motorcycleId, CancellationToken cancellationToken = default);
+    Task<Rental?> GetByIdWithIncludeAsync(int id, CancellationToken cancellationToken = default);
 }

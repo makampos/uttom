@@ -12,4 +12,11 @@ public class RentalRepository(ApplicationDbContext applicationDbContext)
     {
         return await SetAsNoTracking.FirstOrDefaultAsync(x => x.MotorcycleId == motorcycleId, cancellationToken);
     }
+
+    public async Task<Rental?> GetByIdWithIncludeAsync(int id, CancellationToken cancellationToken = default)
+    {
+        return await SetAsNoTracking.Include(x => x.Motorcycle)
+            .Include(x => x.Deliverer)
+            .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
+    }
 }

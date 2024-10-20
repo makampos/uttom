@@ -19,7 +19,7 @@ public class GetRentalQueryHandler : IRequestHandler<GetRentalQuery, ResultRespo
 
     public async Task<ResultResponse<RentalDto>> Handle(GetRentalQuery request, CancellationToken cancellationToken)
     {
-        var rental = await _uttomUnitOfWork.RentalRepository.GetByIdAsync(request.RentalId, cancellationToken);
+        var rental = await _uttomUnitOfWork.RentalRepository.GetByIdWithIncludeAsync(request.RentalId, cancellationToken);
 
         if (rental is null)
         {

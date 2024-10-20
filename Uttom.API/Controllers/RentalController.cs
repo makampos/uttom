@@ -45,4 +45,22 @@ public class RentalController : ControllerBase
             ? NotFound(new { message = "Rental not found." })
             : Ok(result.Data);
     }
+
+    [HttpPut("{id}/return")]
+    [SwaggerOperation(Summary = "Add return date to a rental", Description = "Add return date to a rental.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Return date added successfully", typeof(string))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Rental not found")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid input supplied")]
+    public async Task<IActionResult> AddReturnDate([FromRoute] int id, [FromBody] UpdateRentalCommand command)
+    {
+        var updateRentalCommandWithRentalId = command.RentalId.HasValue
+            ? command
+            : command.WithRentalId(id);
+
+        var result = await _mediator.Send(updateRentalCommandWithRentalId);
+
+        return !result.Success
+            ? BadRequest(new { message = result.ErrorMessage })
+            : Ok(new { message = result.Data });
+    }
 }

@@ -139,6 +139,10 @@ public class ApplicationDbContext : DbContext
             .IsRequired();
 
         modelBuilder.Entity<Rental>()
+            .Property(x => x.ReturnDate)
+            .HasColumnType("date");
+
+        modelBuilder.Entity<Rental>()
             .Property(x => x.DelivererId)
             .HasColumnType("int")
             .IsRequired();

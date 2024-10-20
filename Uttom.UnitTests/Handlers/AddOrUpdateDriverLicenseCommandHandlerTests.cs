@@ -14,11 +14,11 @@ using Uttom.Infrastructure.Services;
 
 namespace Uttom.UnitTests.Handlers;
 
-public class AddDriverLicenseCommandHandlerTests
+public class AddOrUpdateDriverLicenseCommandHandlerTests
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly ApplicationDbContext _dbContext;
-    private readonly AddDriverLicenseCommandHandler _handler;
+    private readonly AddOrUpdateDriverLicenseCommandHandler _handler;
     private readonly MotorcycleRepository _motorcycleRepository;
     private readonly IRegisteredMotorCycleRepository _registeredMotorCycleRepository;
     private readonly IDelivererRepository _delivererRepository;
@@ -28,7 +28,7 @@ public class AddDriverLicenseCommandHandlerTests
 
     private const string PATH = "TestData/Images";
 
-    public AddDriverLicenseCommandHandlerTests()
+    public AddOrUpdateDriverLicenseCommandHandlerTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: "TestDatabase")
@@ -44,7 +44,7 @@ public class AddDriverLicenseCommandHandlerTests
 
         _uttomUnitOfWork = new UttomUnitOfWork(_dbContext, _motorcycleRepository, _registeredMotorCycleRepository, _delivererRepository, _rentalRepository);
 
-        _handler = new AddDriverLicenseCommandHandler(_uttomUnitOfWork, _minioService, _imageService);
+        _handler = new AddOrUpdateDriverLicenseCommandHandler(_uttomUnitOfWork, _minioService, _imageService);
     }
 
 
@@ -52,7 +52,7 @@ public class AddDriverLicenseCommandHandlerTests
     public async Task Handle_ShouldReturnFailureResult_WhenDelivererIsNotFound()
     {
         // Arrange
-        var command = new AddDriverLicenseCommand("base64string", 1);
+        var command = new AddOrUpdateDriverLicenseCommand("base64string", 1);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -80,7 +80,7 @@ public class AddDriverLicenseCommandHandlerTests
         var base64ImageData = StringExtensions.ConvertToBase64($"{PATH}/cnh.jpeg");
 
         // Act
-        var result = await _handler.Handle(new AddDriverLicenseCommand(base64ImageData, entity.Id), CancellationToken.None);
+        var result = await _handler.Handle(new AddOrUpdateDriverLicenseCommand(base64ImageData, entity.Id), CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
@@ -108,7 +108,7 @@ public class AddDriverLicenseCommandHandlerTests
        entityWithoutImage!.DriverLicenseImageId.Should().BeNullOrEmpty();
 
        // Act
-       var result = await _handler.Handle(new AddDriverLicenseCommand(base64ImageData, entity.Id ), CancellationToken.None);
+       var result = await _handler.Handle(new AddOrUpdateDriverLicenseCommand(base64ImageData, entity.Id ), CancellationToken.None);
 
        // Assert
        result.Should().NotBeNull();

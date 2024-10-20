@@ -182,7 +182,7 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         var deliverer = await _factory.Server.Services.CreateScope().ServiceProvider.GetRequiredService<IUttomUnitOfWork>()
             .DelivererRepository.GetDelivererByBusinessTaxIdAsync(command.BusinessTaxId);
 
-        var driverLicenseCommand = new AddDriverLicenseCommand(StringExtensions.ConvertToBase64($"{PATH}/cnh.png"), deliverer!.Id);
+        var driverLicenseCommand = new AddOrUpdateDriverLicenseCommand(StringExtensions.ConvertToBase64($"{PATH}/cnh.png"), deliverer!.Id);
 
         // Act
         var responseUploadImage = await _client.PostAsJsonAsync($"/api/deliverers/{deliverer.Id}/driver-license", driverLicenseCommand);
@@ -210,7 +210,7 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         var deliverer = await _factory.Server.Services.CreateScope().ServiceProvider.GetRequiredService<IUttomUnitOfWork>()
             .DelivererRepository.GetDelivererByBusinessTaxIdAsync(command.BusinessTaxId);
 
-        var driverLicenseCommand = new AddDriverLicenseCommand(StringExtensions.ConvertToBase64($"{PATH}/cnh.jpeg"), deliverer!.Id);
+        var driverLicenseCommand = new AddOrUpdateDriverLicenseCommand(StringExtensions.ConvertToBase64($"{PATH}/cnh.jpeg"), deliverer!.Id);
 
         // Act
         var responseUploadImage = await _client.PostAsJsonAsync($"/api/deliverers/{deliverer.Id}/driver-license", driverLicenseCommand);

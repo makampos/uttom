@@ -1,8 +1,9 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Uttom.Application.DTOs;
 using Uttom.Application.Features.Commands;
-using Uttom.Domain.Interfaces.Abstractions;
+using Uttom.Application.Features.Queries;
 
 namespace Uttom.API.Controllers;
 
@@ -12,12 +13,10 @@ namespace Uttom.API.Controllers;
 public class RentalController : ControllerBase
 {
     private readonly IMediator _mediator;
-    private readonly IUttomUnitOfWork _uttomUnitOfWork;
 
-    public RentalController(IMediator mediator, IUttomUnitOfWork uttomUnitOfWork)
+    public RentalController(IMediator mediator)
     {
         _mediator = mediator;
-        _uttomUnitOfWork = uttomUnitOfWork;
     }
 
     [HttpPost]
@@ -34,17 +33,16 @@ public class RentalController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [SwaggerOperation("Get rental by id")]
-    [SwaggerResponse(StatusCodes.Status200OK)]
-    [SwaggerResponse(StatusCodes.Status404NotFound)]
-    [SwaggerResponse(StatusCodes.Status400BadRequest)]
+    [SwaggerOperation(Summary = "Retrieve a rental by its ID", Description = "Returns rental details for the specified ID.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Rental found", typeof(RentalDto))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Rental not found")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid input supplied")]
     public async Task<IActionResult> GetRentalById([FromRoute] int id)
     {
-        //TODO: Add handler to get by id and return the specific contract for the endpoint, not db entity
-        var result = await _uttomUnitOfWork.RentalRepository.GetByIdAsync(id);
+        var result = await _mediator.Send(new GetRentalQuery(id));
 
-        return result is null
+        return !result.Success
             ? NotFound(new { message = "Rental not found." })
-            : Ok(result);
+            : Ok(result.Data);
     }
 }

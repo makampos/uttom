@@ -34,7 +34,7 @@ public class DelivererController : ControllerBase
     [SwaggerOperation("Upload driver license image")]
     [SwaggerResponse(StatusCodes.Status201Created)]
     [SwaggerResponse(StatusCodes.Status400BadRequest)]
-    public async Task<IActionResult> UploadDriverLicenseImage([FromRoute] int id, [FromBody] AddDriverLicenseCommand command)
+    public async Task<IActionResult> UploadDriverLicenseImage([FromRoute] int id, [FromBody] AddOrUpdateDriverLicenseCommand command)
     {
         var commandWithDriverId = command.DelivererId.HasValue
             ? command

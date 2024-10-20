@@ -1,4 +1,3 @@
-using System.Configuration;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Uttom.Domain.Interfaces.Abstractions;
@@ -104,6 +103,11 @@ public static class DependencyInjection
                     Url = new Uri("https://uttom.fake")
                 }
             });
+
+            // add xml comments
+            // var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+            // var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
+            // c.IncludeXmlComments(xmlPath);
         });
 
         return services;

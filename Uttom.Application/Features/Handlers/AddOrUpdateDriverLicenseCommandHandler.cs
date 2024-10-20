@@ -6,20 +6,20 @@ using Uttom.Domain.Results;
 
 namespace Uttom.Application.Features.Handlers;
 
-public class AddDriverLicenseCommandHandler : IRequestHandler<AddDriverLicenseCommand, ResultResponse<bool>>
+public class AddOrUpdateDriverLicenseCommandHandler : IRequestHandler<AddOrUpdateDriverLicenseCommand, ResultResponse<bool>>
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly IMinioService _minioService;
     private readonly IImageService _imageService;
 
-    public AddDriverLicenseCommandHandler(IUttomUnitOfWork unitOfWork, IMinioService minioService, IImageService imageService)
+    public AddOrUpdateDriverLicenseCommandHandler(IUttomUnitOfWork unitOfWork, IMinioService minioService, IImageService imageService)
     {
         _uttomUnitOfWork = unitOfWork;
         _minioService = minioService;
         _imageService = imageService;
     }
 
-    public async Task<ResultResponse<bool>> Handle(AddDriverLicenseCommand command, CancellationToken cancellationToken)
+    public async Task<ResultResponse<bool>> Handle(AddOrUpdateDriverLicenseCommand command, CancellationToken cancellationToken)
     {
         var delivererId = command.DelivererId ?? 0;
 
@@ -39,6 +39,8 @@ public class AddDriverLicenseCommandHandler : IRequestHandler<AddDriverLicenseCo
         var driverLicenseImageId = await _minioService.UploadImageAsync(deliverer.Id, command.DriverLicenseImageBase64);
 
         deliverer.AddOrUpdateDriverLicenseImageId(driverLicenseImageId);
+
+        await _uttomUnitOfWork.DelivererRepository.UpdateAsync(deliverer, cancellationToken);
 
         await _uttomUnitOfWork.SaveChangesAsync(cancellationToken);
 

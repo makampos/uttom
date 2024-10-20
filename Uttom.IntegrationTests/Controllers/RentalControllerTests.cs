@@ -2,6 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
+using Uttom.Application.DTOs;
 using Uttom.Application.Features.Commands;
 using Uttom.Domain.Enum;
 using Uttom.Domain.Interfaces.Abstractions;
@@ -93,13 +94,13 @@ public class RentalControllerTests : IClassFixture<CustomWebApplicationFactory>
         var delivererResponse = await _client.PostAsJsonAsync("/api/deliverers", delivererCommand);
         delivererResponse.EnsureSuccessStatusCode();
 
-        var motorcycleId = await GetMotorcycle(motorcycleCommand.PlateNumber);
-        var delivererId = await GetDeliverer(delivererCommand.BusinessTaxId);
+        var motorcycle = await GetMotorcycle(motorcycleCommand.PlateNumber);
+        var deliverer = await GetDeliverer(delivererCommand.BusinessTaxId);
 
         var command = new AddRentalCommand(
             PlanId: RentalPlans.GetPlan(7)!.Days,
-            DeliverId: delivererId.Id,
-            MotorcycleId: motorcycleId.Id,
+            DeliverId: deliverer.Id,
+            MotorcycleId: motorcycle.Id,
             StartDate: DateOnly.FromDateTime(DateTime.Today),
             EstimatingEndingDate: DateOnly.FromDateTime(DateTime.Today.AddDays(8)));
 
@@ -107,12 +108,11 @@ public class RentalControllerTests : IClassFixture<CustomWebApplicationFactory>
         response.EnsureSuccessStatusCode();
 
         // Act
-        // Get rental by id
         var rental = await _client.GetAsync($"/api/rentals/{1}");
         rental.EnsureSuccessStatusCode();
 
-        // var result = await rental.Content.ReadFromJsonAsync<Rental>();
-        // result.Should().NotBeNull();
+        var result = await rental.Content.ReadFromJsonAsync<RentalDto>();
+        result.Should().NotBeNull();
     }
 
     // TODO: Add more tests to cover all scenarios such as BadRequest and NotFound

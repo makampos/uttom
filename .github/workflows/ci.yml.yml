@@ -21,8 +21,6 @@ jobs:
           POSTGRES_DB: uttomdb
         ports:
           - 5432:5432
-        volumes:
-          - pgdata:/var/lib/postgresql/data
         options: >-
           --health-cmd "pg_isready -U uttom"
           --health-interval 10s
@@ -37,8 +35,6 @@ jobs:
         env:
           RABBITMQ_DEFAULT_USER: guest
           RABBITMQ_DEFAULT_PASS: guest
-        volumes:
-          - rabbitmq_data:/var/lib/rabbitmq
 
       minio:
         image: minio/minio
@@ -48,9 +44,8 @@ jobs:
         env:
           MINIO_ROOT_USER: "minioadmin"
           MINIO_ROOT_PASSWORD: "minioadmin"
-        volumes:
-          - minio_data:/data
-        command: server /data --console-address ":9090"
+        options: >-
+          --console-address ":9090"
 
     steps:
       - name: Checkout code
@@ -72,9 +67,3 @@ jobs:
 
       - name: Run Unit Tests
         run: dotnet test Uttom.UnitTests/Uttom.UnitTests.csproj --configuration Release --no-build --collect:"XPlat Code Coverage"
-
-volumes:
-  pgdata:
-  rabbitmq_data:
-  minio_data:
-

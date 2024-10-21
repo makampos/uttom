@@ -39,7 +39,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
             null);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/deliverers", command);
+        var response = await _client.PostAsJsonAsync("/entregadores", command);
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -58,7 +58,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
             GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
-        var response = await _client.PostAsJsonAsync("/api/deliverers", command);
+        var response = await _client.PostAsJsonAsync("/entregadores", command);
         response.EnsureSuccessStatusCode();
 
         var anotherCommandWithExistingBusinessTaxId = new AddDelivererCommand(
@@ -71,7 +71,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
             null);
 
         // Act
-        var responseWithExistingBusinessTaxId = await _client.PostAsJsonAsync("/api/deliverers", anotherCommandWithExistingBusinessTaxId);
+        var responseWithExistingBusinessTaxId = await _client.PostAsJsonAsync("/entregadores", anotherCommandWithExistingBusinessTaxId);
         var result = await responseWithExistingBusinessTaxId.Content.ReadAsStringAsync();
 
         // Assert
@@ -91,7 +91,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
             GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
-        var response = await _client.PostAsJsonAsync("/api/deliverers", command);
+        var response = await _client.PostAsJsonAsync("/entregadores", command);
         response.EnsureSuccessStatusCode();
 
         var anotherCommandWithExistingDriverLicenseNumber = new AddDelivererCommand(
@@ -104,7 +104,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
             null);
 
         // Act
-        var responseWithExistingDriverLicenseNumber = await _client.PostAsJsonAsync("/api/deliverers", anotherCommandWithExistingDriverLicenseNumber);
+        var responseWithExistingDriverLicenseNumber = await _client.PostAsJsonAsync("/entregadores", anotherCommandWithExistingDriverLicenseNumber);
         var result = await responseWithExistingDriverLicenseNumber.Content.ReadAsStringAsync();
 
         // Assert
@@ -128,7 +128,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
             base64ImageData);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/deliverers", command);
+        var response = await _client.PostAsJsonAsync("/entregadores", command);
         var result = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -151,7 +151,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
             base64ImageData);
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/deliverers", command);
+        var response = await _client.PostAsJsonAsync("/entregadores", command);
         var result = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -179,7 +179,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
             GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
-        var response = await _client.PostAsJsonAsync("/api/deliverers", command);
+        var response = await _client.PostAsJsonAsync("/entregadores", command);
         response.EnsureSuccessStatusCode();
 
         var deliverer = await _factory.Server.Services.CreateScope().ServiceProvider.GetRequiredService<IUttomUnitOfWork>()
@@ -188,7 +188,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
         var driverLicenseCommand = new AddOrUpdateDriverLicenseCommand(StringExtensions.ConvertToBase64($"{PATH}/cnh.png"), deliverer!.Id);
 
         // Act
-        var responseUploadImage = await _client.PostAsJsonAsync($"/api/deliverers/{deliverer.Id}/driver-license", driverLicenseCommand);
+        var responseUploadImage = await _client.PostAsJsonAsync($"/entregadores/{deliverer.Id}/cnh", driverLicenseCommand);
 
         // Assert
         responseUploadImage.EnsureSuccessStatusCode();
@@ -207,7 +207,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
             GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
-        var response = await _client.PostAsJsonAsync("/api/deliverers", command);
+        var response = await _client.PostAsJsonAsync("/entregadores", command);
         response.EnsureSuccessStatusCode();
 
         var deliverer = await _factory.Server.Services.CreateScope().ServiceProvider.GetRequiredService<IUttomUnitOfWork>()
@@ -216,7 +216,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
         var driverLicenseCommand = new AddOrUpdateDriverLicenseCommand(StringExtensions.ConvertToBase64($"{PATH}/cnh.jpeg"), deliverer!.Id);
 
         // Act
-        var responseUploadImage = await _client.PostAsJsonAsync($"/api/deliverers/{deliverer.Id}/driver-license", driverLicenseCommand);
+        var responseUploadImage = await _client.PostAsJsonAsync($"/entregadores/{deliverer.Id}/cnh", driverLicenseCommand);
         var result = await responseUploadImage.Content.ReadAsStringAsync();
 
         // Assert

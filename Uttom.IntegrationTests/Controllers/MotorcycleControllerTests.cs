@@ -15,8 +15,6 @@ using Uttom.IntegrationTests.Helpers;
 
 namespace Uttom.IntegrationTests.Controllers;
 
-//TODO: Revisit these tests to adjust routes and responses later
-
 [Collection("Integration Tests")]
 public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebApplicationFactory>
 {
@@ -37,7 +35,7 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
         var command = new AddMotorcycleCommand("ID1234", 2023, "ModelN", GeneratePlateNumber());
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/motorcycles", command);
+        var response = await _client.PostAsJsonAsync("/motos", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -50,7 +48,7 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
         var command = new AddMotorcycleCommand("ID1234", 2024, "ModelZ", GeneratePlateNumber());
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/motorcycles", command);
+        var response = await _client.PostAsJsonAsync("/motos", command);
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
@@ -63,13 +61,13 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
     {
         // Arrange
         var command = new AddMotorcycleCommand("ID1234", 2023, "ModelJ", GeneratePlateNumber());
-        var motorcycleIsCreated = await _client.PostAsJsonAsync("/api/motorcycles", command);
+        var motorcycleIsCreated = await _client.PostAsJsonAsync("/motos", command);
         motorcycleIsCreated.EnsureSuccessStatusCode();
 
         var query = new GetMotorcyclesQuery(1, 10);
 
         // Act
-        var response = await _client.GetAsync($"/api/motorcycles?pageNumber={query.PageNumber}&pageSize={query.PageSize}");
+        var response = await _client.GetAsync($"/motos?pageNumber={query.PageNumber}&pageSize={query.PageSize}");
         var result = await response.Content.ReadFromJsonAsync<ResultResponse<PagedResult<MotorcycleDto>>>();
 
         // Assert
@@ -86,7 +84,7 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
         var query = new GetMotorcyclesQuery(1, 10);
 
         // Act
-        var response = await _client.GetAsync($"/api/motorcycles?pageNumber={query.PageNumber}&pageSize={query.PageSize}");
+        var response = await _client.GetAsync($"/motos?pageNumber={query.PageNumber}&pageSize={query.PageSize}");
         var result = await response.Content.ReadFromJsonAsync<ResultResponse<PagedResult<MotorcycleDto>>>();
 
         // Assert
@@ -100,13 +98,13 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
     {
         // Arrange
         var command = new AddMotorcycleCommand("ID1234", 2023, "ModelH", GeneratePlateNumber());
-        var motorcycleIsCreated = await _client.PostAsJsonAsync("/api/motorcycles", command);
+        var motorcycleIsCreated = await _client.PostAsJsonAsync("/motos", command);
         motorcycleIsCreated.EnsureSuccessStatusCode();
 
         var query = new GetMotorcycleByPlateNumberQuery(command.PlateNumber);
 
         // Act
-        var response = await _client.GetAsync($"/api/motorcycles/plate-number?plateNumber={query.PlateNumber}");
+        var response = await _client.GetAsync($"/motos/placa?plateNumber={query.PlateNumber}");
         var result = await response.Content.ReadFromJsonAsync<MotorcycleDto>();
 
         // Assert
@@ -121,7 +119,7 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
         var query = new GetMotorcycleByPlateNumberQuery(GeneratePlateNumber());
 
         // Act
-        var response = await _client.GetAsync($"/api/motorcycles/plate-number?plateNumber={query.PlateNumber}"); // this is wierd LOL
+        var response = await _client.GetAsync($"/motos/placa?plateNumber={query.PlateNumber}"); // this is wierd LOL
         var result = await response.Content.ReadAsStringAsync();
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -134,13 +132,13 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
     {
         // Arrange
         var command = new AddMotorcycleCommand("ID1234", 2023, "ModelZ", GeneratePlateNumber());
-        var motorcycleIsCreated = await _client.PostAsJsonAsync("/api/motorcycles", command);
+        var motorcycleIsCreated = await _client.PostAsJsonAsync("/motos", command);
         motorcycleIsCreated.EnsureSuccessStatusCode();
 
         var query = new GetMotorcycleByPlateNumberQuery(command.PlateNumber);
 
         // Act
-        var response = await _client.GetAsync($"/api/motorcycles/plate-number?plateNumber={query.PlateNumber}"); // this is wierd LOL
+        var response = await _client.GetAsync($"/motos/placa?plateNumber={query.PlateNumber}"); // this is wierd LOL
         var result = await response.Content.ReadFromJsonAsync<MotorcycleDto>();
 
         // Assert
@@ -153,15 +151,15 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
     {
         // Arrange
         var command = new AddMotorcycleCommand("ID1234", 2023, "ModelX", GeneratePlateNumber());
-        var motorcycleIsCreated = await _client.PostAsJsonAsync("/api/motorcycles", command);
+        var motorcycleIsCreated = await _client.PostAsJsonAsync("/motos", command);
         motorcycleIsCreated.EnsureSuccessStatusCode();
 
         var query = new GetMotorcycleByPlateNumberQuery(command.PlateNumber);
-        var motorcycleByPlateNumberResult = await _client.GetAsync($"/api/motorcycles/plate-number?plateNumber={query.PlateNumber}");
+        var motorcycleByPlateNumberResult = await _client.GetAsync($"/motos/placa?plateNumber={query.PlateNumber}");
         var motorcycleByPlateNumber = await motorcycleByPlateNumberResult.Content.ReadFromJsonAsync<MotorcycleDto>();
 
         // Act
-        var response = await _client.GetAsync($"/api/motorcycles/{motorcycleByPlateNumber!.Id}");
+        var response = await _client.GetAsync($"/motos/{motorcycleByPlateNumber!.Id}");
         var result = await response.Content.ReadFromJsonAsync<MotorcycleDto>();
 
         // Assert
@@ -174,7 +172,7 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
     {
         // Arrange
         // Act
-        var response = await _client.GetAsync($"/api/motorcycles/{100}");
+        var response = await _client.GetAsync($"/motos/{100}");
         var result = await response.Content.ReadAsStringAsync();
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -186,11 +184,11 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
     {
         // Arrange
         var command = new AddMotorcycleCommand("ID1234", 2023, "ModelY", GeneratePlateNumber());
-        var motorcycleIsCreated = await _client.PostAsJsonAsync("/api/motorcycles", command);
+        var motorcycleIsCreated = await _client.PostAsJsonAsync("/motos", command);
         motorcycleIsCreated.EnsureSuccessStatusCode();
 
         // Act
-        var response = await _client.DeleteAsync($"/api/motorcycles/{1}");
+        var response = await _client.DeleteAsync($"/motos/{1}");
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
@@ -201,7 +199,7 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
     {
         // Arrange
         // Act
-        var response = await _client.DeleteAsync($"/api/motorcycles/{99}");
+        var response = await _client.DeleteAsync($"/motos/{99}");
         var result = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -215,21 +213,21 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
     {
         // Arrange
         var command = new AddMotorcycleCommand("ID1234", 2023, "ModelY", GeneratePlateNumber());
-        var motorcycleIsCreated = await _client.PostAsJsonAsync("/api/motorcycles", command);
+        var motorcycleIsCreated = await _client.PostAsJsonAsync("/motos", command);
         motorcycleIsCreated.EnsureSuccessStatusCode();
 
         // get motorcycle by plate number
-        var motorcycleExists = await _client.GetAsync($"/api/motorcycles/plate-number?plateNumber={command.PlateNumber}");
+        var motorcycleExists = await _client.GetAsync($"/motos/placa?plateNumber={command.PlateNumber}");
         var motorcycleExistsResult = await motorcycleExists.Content.ReadFromJsonAsync<MotorcycleDto>();
 
         var updateCommand = new UpdateMotorcycleCommand(GeneratePlateNumber(), motorcycleExistsResult!.Id);
 
         var query = new GetMotorcycleByPlateNumberQuery(command.PlateNumber);
-        var motorcycleByPlateNumberUpdatedExists = await _client.GetAsync($"/api/motorcycles/plate-number?plateNumber={query.PlateNumber}");
+        var motorcycleByPlateNumberUpdatedExists = await _client.GetAsync($"/motos/placa?plateNumber={query.PlateNumber}");
         var motorcycleByPlateNumberUpdatedResult = await motorcycleByPlateNumberUpdatedExists.Content.ReadFromJsonAsync<MotorcycleDto>();
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/motorcycles/{motorcycleByPlateNumberUpdatedResult!.Id}/plate-number", updateCommand);
+        var response = await _client.PutAsJsonAsync($"/motos/{motorcycleByPlateNumberUpdatedResult!.Id}/placa", updateCommand);
         var result = await response.Content.ReadAsStringAsync();
 
         // Assert

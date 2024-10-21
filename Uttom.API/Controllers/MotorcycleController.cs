@@ -10,7 +10,7 @@ using Uttom.Domain.Interfaces.Abstractions;
 namespace Uttom.API.Controllers;
 
 [ApiController]
-[Route("api/motorcycles")]
+[Route("/motos")]
 [SwaggerTag("Motorcycles Service")]
 public class MotorcycleController : ControllerBase
 {
@@ -48,7 +48,7 @@ public class MotorcycleController : ControllerBase
         return Ok(result);
     }
 
-    [HttpGet("plate-number")]
+    [HttpGet("placa")]
     [SwaggerOperation("Get a motorcycle by plate number")]
     [SwaggerResponse(StatusCodes.Status200OK, "Motorcycle found", typeof(MotorcycleDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Motorcycle not found")]
@@ -61,18 +61,14 @@ public class MotorcycleController : ControllerBase
             : Ok(result.Data);
     }
 
-    [HttpPut("{id}/plate-number")]
+    [HttpPut("{id}/placa")]
     [SwaggerOperation("Update a motorcycle's plate number")]
     [SwaggerResponse(StatusCodes.Status200OK, "Motorcycle updated", typeof(string))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Motorcycle not found")]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Validation failed")]
     public async Task<IActionResult> UpdateMotorcyclePlateNumber([FromRoute] int id, [FromBody] UpdateMotorcycleCommand command)
     {
-        var commandWithMotorcycleId = command.MotorcycleId.HasValue
-            ? command
-            : command.WithMotorcycleId(id);
-
-        var result = await _mediator.Send(commandWithMotorcycleId);
+        var result = await _mediator.Send(command.WithMotorcycleId(id));
 
         return !result.Success
             ? NotFound(result.ErrorMessage)

@@ -36,7 +36,7 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
             Model: "ModelX",
             PlateNumber: GeneratePlateNumber());
 
-        var motorcycleResponse = await _client.PostAsJsonAsync("/api/motorcycles", motorcycleCommand);
+        var motorcycleResponse = await _client.PostAsJsonAsync("/motos", motorcycleCommand);
         motorcycleResponse.EnsureSuccessStatusCode();
 
         // add deliverer
@@ -49,7 +49,7 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
             1,
             null);
 
-        var delivererResponse = await _client.PostAsJsonAsync("/api/deliverers", delivererCommand);
+        var delivererResponse = await _client.PostAsJsonAsync("/entregadores", delivererCommand);
         delivererResponse.EnsureSuccessStatusCode();
 
         var motorcycleId = await GetMotorcycle(motorcycleCommand.PlateNumber);
@@ -64,7 +64,7 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
             EstimatingEndingDate: DateOnly.FromDateTime(DateTime.Today.AddDays(8)));
 
         // Act
-        var response = await _client.PostAsJsonAsync("/api/rentals", command);
+        var response = await _client.PostAsJsonAsync("/locacao", command);
 
         // Assert
         response.EnsureSuccessStatusCode();
@@ -81,7 +81,7 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
             Model: "ModelX",
             PlateNumber: GeneratePlateNumber());
 
-        var motorcycleResponse = await _client.PostAsJsonAsync("/api/motorcycles", motorcycleCommand);
+        var motorcycleResponse = await _client.PostAsJsonAsync("/motos", motorcycleCommand);
         motorcycleResponse.EnsureSuccessStatusCode();
 
         var delivererCommand = new AddDelivererCommand(
@@ -93,7 +93,7 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
             1,
             null);
 
-        var delivererResponse = await _client.PostAsJsonAsync("/api/deliverers", delivererCommand);
+        var delivererResponse = await _client.PostAsJsonAsync("/entregadores", delivererCommand);
         delivererResponse.EnsureSuccessStatusCode();
 
         var motorcycle = await GetMotorcycle(motorcycleCommand.PlateNumber);
@@ -106,12 +106,12 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
             StartDate: DateOnly.FromDateTime(DateTime.Today),
             EstimatingEndingDate: DateOnly.FromDateTime(DateTime.Today.AddDays(8)));
 
-        var response = await _client.PostAsJsonAsync("/api/rentals", command);
+        var response = await _client.PostAsJsonAsync("/locacao", command);
         response.EnsureSuccessStatusCode();
 
 
         // Act
-        var rental = await _client.GetAsync($"/api/rentals/{1}");
+        var rental = await _client.GetAsync($"/locacao/{1}");
         rental.EnsureSuccessStatusCode();
 
         var result = await rental.Content.ReadFromJsonAsync<RentalDto>();
@@ -128,7 +128,7 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
             Model: "ModelX",
             PlateNumber: "ABC-1234");
 
-        var motorcycleResponse = await _client.PostAsJsonAsync("/api/motorcycles", motorcycleCommand);
+        var motorcycleResponse = await _client.PostAsJsonAsync("/motos", motorcycleCommand);
         motorcycleResponse.EnsureSuccessStatusCode();
 
         var delivererCommand = new AddDelivererCommand(
@@ -140,7 +140,7 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
             1,
             null);
 
-        var delivererResponse = await _client.PostAsJsonAsync("/api/deliverers", delivererCommand);
+        var delivererResponse = await _client.PostAsJsonAsync("/entregadores", delivererCommand);
         delivererResponse.EnsureSuccessStatusCode();
 
         var motorcycle = await GetMotorcycle(motorcycleCommand.PlateNumber);
@@ -153,10 +153,10 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
             StartDate: DateOnly.FromDateTime(DateTime.Today),
             EstimatingEndingDate: DateOnly.FromDateTime(DateTime.Today.AddDays(8)));
 
-        var response = await _client.PostAsJsonAsync("/api/rentals", command);
+        var response = await _client.PostAsJsonAsync("/locacao", command);
         response.EnsureSuccessStatusCode();
 
-        var rental = await _client.GetAsync($"/api/rentals/{1}");
+        var rental = await _client.GetAsync($"/locacao/{1}");
         rental.EnsureSuccessStatusCode();
 
         var rentalDTo = await rental.Content.ReadFromJsonAsync<RentalDto>();
@@ -164,7 +164,7 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
         var updateCommand = new UpdateRentalCommand(rentalDTo!.EndDate);
 
         // Act
-        var updateResponse = await _client.PutAsJsonAsync($"/api/rentals/{rentalDTo.Id}/return", updateCommand);
+        var updateResponse = await _client.PutAsJsonAsync($"/locacao/{rentalDTo.Id}/devolucao", updateCommand);
         var updateResult = await updateResponse.Content.ReadAsStringAsync();
 
         // Assert
@@ -173,19 +173,13 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
         updateResult.Should().NotBeNullOrEmpty();
     }
 
-    // TODO: Add more tests to cover all scenarios such as BadRequest and NotFound
-
-    // DbExtension Methods
-    // Get motorcycle from repository
     private async Task<Motorcycle> GetMotorcycle(string plateNumber)
     {
-        // create scope
         using var scope = _factory.Services.CreateScope();
         var uttomUnitOfWork = scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>();
         return await uttomUnitOfWork.MotorcycleRepository.GetByPlateNumberAsync(plateNumber, false);
     }
 
-    // Get deliverer from repository
     private async Task<Deliverer> GetDeliverer(string businessTaxId)
     {
         using var scope = _factory.Services.CreateScope();

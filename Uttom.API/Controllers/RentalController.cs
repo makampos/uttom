@@ -8,7 +8,7 @@ using Uttom.Application.Features.Queries;
 namespace Uttom.API.Controllers;
 
 [ApiController]
-[Route("api/rentals")]
+[Route("/locacao")]
 [SwaggerTag("Rental Service")]
 public class RentalController : ControllerBase
 {
@@ -46,7 +46,7 @@ public class RentalController : ControllerBase
             : Ok(result.Data);
     }
 
-    [HttpPut("{id}/return")]
+    [HttpPut("{id}/devolucao")]
     [SwaggerOperation(Summary = "Add return date to a rental", Description = "Add return date to a rental.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Return date added successfully", typeof(string))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Rental not found")]

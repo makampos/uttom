@@ -10,7 +10,7 @@ public static class Mappers
     {
         return new RentalDto(
             rental.Id,
-            string.Empty, // choose which identifier to use, motorcycle, deliverer or it is own Rental identifier?
+            string.Empty, // TODO: Add the identifier during the rental creation
             dailyRate,
             rental.DelivererId,
             rental.MotorcycleId,

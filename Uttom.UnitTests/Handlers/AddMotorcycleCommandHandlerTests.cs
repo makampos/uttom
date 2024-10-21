@@ -8,10 +8,11 @@ using Uttom.Domain.Interfaces.Repositories;
 using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
+using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers
 {
-    public class AddMotorcycleCommandHandlerTests : IClassFixture<RabbitMqFixture>
+    public class AddMotorcycleCommandHandlerTests : TestHelper, IClassFixture<RabbitMqFixture>
     {
         private readonly IUttomUnitOfWork _uttomUnitOfWork;
         private readonly ApplicationDbContext _dbContext;
@@ -59,7 +60,7 @@ namespace Uttom.UnitTests.Handlers
         public async Task Handle_ShouldAddMotorcycle_WhenValidCommandIsGiven()
         {
             // Arrange
-            var command = new AddMotorcycleCommand("Yamaha", 2020, "YZB", "155000");
+            var command = new AddMotorcycleCommand("Yamaha", 2020, "YZB", GeneratePlateNumber());
 
             // Act
             var result = await _handler.Handle(command, CancellationToken.None);
@@ -72,16 +73,16 @@ namespace Uttom.UnitTests.Handlers
             motorcycle.Identifier.Should().Be("Yamaha");
             motorcycle.Year.Should().Be(2020);
             motorcycle.Model.Should().Be("YZB");
-            motorcycle.PlateNumber.Should().Be("155000");
+            motorcycle.PlateNumber.Should().Be(command.PlateNumber);
         }
 
         [Fact]
         public async Task Handle_ShouldNotAddMotorcycle_WhenPlateNumberAlreadyExists()
         {
             // Arrange
-            var command = new AddMotorcycleCommand("Yamaha", 2020, "YZB", "155000");
+            var command = new AddMotorcycleCommand("Yamaha", 2020, "YZB", GeneratePlateNumber());
 
-            var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", "155000");
+            var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", command.PlateNumber);
             await _dbContext.Motorcycles.AddAsync(existingMotorcycle);
             await _dbContext.SaveChangesAsync();
 

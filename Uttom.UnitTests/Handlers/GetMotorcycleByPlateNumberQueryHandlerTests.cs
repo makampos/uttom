@@ -7,10 +7,11 @@ using Uttom.Domain.Interfaces.Repositories;
 using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
+using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
-public class GetMotorcycleByPlateNumberQueryHandlerTests
+public class GetMotorcycleByPlateNumberQueryHandlerTests : TestHelper, IDisposable, IAsyncDisposable
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly ApplicationDbContext _dbContext;
@@ -23,7 +24,7 @@ public class GetMotorcycleByPlateNumberQueryHandlerTests
     public GetMotorcycleByPlateNumberQueryHandlerTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .UseInMemoryDatabase(databaseName: "TestDatabase"+Guid.NewGuid())
             .Options;
 
         _dbContext = new ApplicationDbContext(options);
@@ -41,7 +42,7 @@ public class GetMotorcycleByPlateNumberQueryHandlerTests
     public async Task Handle_ShouldReturnFailureResult_WhenInvalidQueryIsGiven()
     {
         // Arrange
-        var entity = Motorcycle.Create("Yamaha", 2020, "YZB", "DHA-1234");
+        var entity = Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber());
 
         await _uttomUnitOfWork.MotorcycleRepository.AddAsync(entity);
         await _dbContext.SaveChangesAsync();
@@ -59,18 +60,28 @@ public class GetMotorcycleByPlateNumberQueryHandlerTests
     public async Task Handle_ShouldReturnMotorcycle_WhenValidQueryIsGiven()
     {
         // Arrange
-        var entity = Motorcycle.Create("Yamaha", 2020, "YZB", "DHA-1234");
+        var entity = Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber());
 
         await _uttomUnitOfWork.MotorcycleRepository.AddAsync(entity);
         await _uttomUnitOfWork.SaveChangesAsync();
 
         // Act
-        var result = await _handler.Handle(new GetMotorcycleByPlateNumberQuery("DHA-1234"), CancellationToken.None);
+        var result = await _handler.Handle(new GetMotorcycleByPlateNumberQuery(entity.PlateNumber), CancellationToken.None);
 
         // Assert
         result.Should().NotBeNull();
         result.Success.Should().BeTrue();
         result.Data.Should().NotBeNull();
-        result.Data!.PlateNumber.Should().Be("DHA-1234");
+        result.Data!.PlateNumber.Should().Be(entity.PlateNumber);
+    }
+
+    public void Dispose()
+    {
+        _dbContext.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _dbContext.DisposeAsync();
     }
 }

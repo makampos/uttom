@@ -1,6 +1,7 @@
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
+using Uttom.Application.DTOs;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Queries;
 using Uttom.Domain.Interfaces.Abstractions;
@@ -49,18 +50,33 @@ public class MotorcycleController : ControllerBase
 
     [HttpGet("plate-number")]
     [SwaggerOperation("Get a motorcycle by plate number")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Motorcycle found", typeof(Motorcycle))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Motorcycle found", typeof(MotorcycleDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Motorcycle not found")]
     public async Task<IActionResult> GetMotorcycleByPlateNumber([FromQuery] GetMotorcycleByPlateNumberQuery query)
     {
         var result = await _mediator.Send(query);
 
-        if (!result.Success)
-        {
-            return NotFound(result.ErrorMessage);
-        }
+        return !result.Success
+            ? NotFound(result.ErrorMessage)
+            : Ok(result.Data);
+    }
 
-        return Ok(result.Data);
+    [HttpPut("{id}/plate-number")]
+    [SwaggerOperation("Update a motorcycle's plate number")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Motorcycle updated", typeof(string))]
+    [SwaggerResponse(StatusCodes.Status404NotFound, "Motorcycle not found")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Validation failed")]
+    public async Task<IActionResult> UpdateMotorcyclePlateNumber([FromRoute] int id, [FromBody] UpdateMotorcycleCommand command)
+    {
+        var commandWithMotorcycleId = command.MotorcycleId.HasValue
+            ? command
+            : command.WithMotorcycleId(id);
+
+        var result = await _mediator.Send(commandWithMotorcycleId);
+
+        return !result.Success
+            ? NotFound(result.ErrorMessage)
+            : Ok(result.Data);
     }
 
     [HttpGet("{id}")]
@@ -69,7 +85,8 @@ public class MotorcycleController : ControllerBase
     [SwaggerResponse(StatusCodes.Status404NotFound, "Motorcycle not found")]
     public async Task<IActionResult> GetMotorcycleById(int id)
     {
-        var result = await _unitOfWork.MotorcycleRepository.GetByIdAsync(id); // Add Handler for this instead to get directly from the repository
+        // Add DTO
+        var result = await _unitOfWork.MotorcycleRepository.GetByIdAsync(id);
 
         return result is null
             ? NotFound("Motorcycle not found.")
@@ -79,9 +96,9 @@ public class MotorcycleController : ControllerBase
 
     [HttpDelete("{id}")]
     [SwaggerOperation("Delete a motorcycle by id")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Motorcycle deleted", typeof(Motorcycle))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Motorcycle deleted")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Motorcycle not found")]
-    [SwaggerResponse(StatusCodes.Status400BadRequest, "Motorcycle has rental record")]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Motorcycle has rental record, or validation failed")]
     public async Task<IActionResult> DeleteMotorcycleById([FromRoute] DeleteMotorcycleCommand command)
     {
         var result = await _mediator.Send(command);

@@ -18,4 +18,15 @@ public static class Mappers
             rental.EstimatingEndingDate
         );
     }
+
+    public static MotorcycleDto ToDto(this Motorcycle motorcycle)
+    {
+        return new MotorcycleDto(
+            motorcycle.Id,
+            motorcycle.Identifier,
+            motorcycle.Year,
+            motorcycle.Model,
+            motorcycle.PlateNumber
+        );
+    }
 }

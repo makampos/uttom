@@ -15,7 +15,7 @@ public class RentalRepository(ApplicationDbContext applicationDbContext)
 
     public async Task<Rental?> GetByIdWithIncludeAsync(int id, CancellationToken cancellationToken = default)
     {
-        return await SetAsNoTracking.Include(x => x.Motorcycle)
+        return await SetAsTracking.Include(x => x.Motorcycle)
             .Include(x => x.Deliverer)
             .FirstOrDefaultAsync(x => x.Id == id, cancellationToken);
     }

@@ -23,6 +23,7 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             .WithDatabase("uttomdb")
             .WithUsername("uttom")
             .WithPassword("uttom77")
+            .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5432))
             .Build();
 
         _rabbitMqContainer = new RabbitMqBuilder()

@@ -8,10 +8,11 @@ using Uttom.Domain.Interfaces.Repositories;
 using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
+using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
-public class GetRentalQueryHandlerTests
+public class GetRentalQueryHandlerTests : TestHelper, IDisposable, IAsyncDisposable
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly ApplicationDbContext _dbContext;
@@ -57,13 +58,13 @@ public class GetRentalQueryHandlerTests
     public async Task Handle_ShouldReturnRental_WhenRentalExists()
     {
         // Arrange
-        var motorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", "DHA-1234");
+        var motorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber());
         var deliverer = Deliverer.Create(
             "SEA",
             "Sara Elza Alves",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1992, 10, 20),
-            "59375336842", DriverLicenseType.AB);
+            GenerateDocument(DocumentType.DriverLicenseNumber), DriverLicenseType.AB);
 
         await _uttomUnitOfWork.MotorcycleRepository.AddAsync(motorcycle);
         await _uttomUnitOfWork.DelivererRepository.AddAsync(deliverer);
@@ -88,5 +89,15 @@ public class GetRentalQueryHandlerTests
         result.Should().NotBeNull();
         result.Success.Should().BeTrue();
         result.Data.Should().NotBeNull();
+    }
+
+    public void Dispose()
+    {
+        _dbContext.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _dbContext.DisposeAsync();
     }
 }

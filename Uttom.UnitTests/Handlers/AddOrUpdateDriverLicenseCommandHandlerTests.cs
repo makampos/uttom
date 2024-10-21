@@ -11,10 +11,11 @@ using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
 using Uttom.Infrastructure.Services;
+using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
-public class AddOrUpdateDriverLicenseCommandHandlerTests
+public class AddOrUpdateDriverLicenseCommandHandlerTests : TestHelper, IDisposable, IAsyncDisposable
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly ApplicationDbContext _dbContext;
@@ -31,7 +32,7 @@ public class AddOrUpdateDriverLicenseCommandHandlerTests
     public AddOrUpdateDriverLicenseCommandHandlerTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .UseInMemoryDatabase(databaseName: "TestDatabase"+Guid.NewGuid())
             .Options;
 
         _dbContext = new ApplicationDbContext(options);
@@ -52,7 +53,7 @@ public class AddOrUpdateDriverLicenseCommandHandlerTests
     public async Task Handle_ShouldReturnFailureResult_WhenDelivererIsNotFound()
     {
         // Arrange
-        var command = new AddOrUpdateDriverLicenseCommand("base64string", 1);
+        var command = new AddOrUpdateDriverLicenseCommand(string.Empty, 1);
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -70,9 +71,9 @@ public class AddOrUpdateDriverLicenseCommandHandlerTests
         var entity = Deliverer.Create(
             "SEA",
             "Sara Elza Alves",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1992, 10, 20),
-            "59375336842", DriverLicenseType.AB);
+            GenerateDocument(DocumentType.DriverLicenseNumber), DriverLicenseType.AB);
 
         await _uttomUnitOfWork.DelivererRepository.AddAsync(entity);
         await _uttomUnitOfWork.SaveChangesAsync();
@@ -95,9 +96,9 @@ public class AddOrUpdateDriverLicenseCommandHandlerTests
        var entity = Deliverer.Create(
            "SEA",
            "Sara Elza Alves",
-           "20.681.653/0001-90",
+           GenerateDocument(DocumentType.BusinessTaxId),
            new DateTime(1992, 10, 20),
-           "59375336842", DriverLicenseType.AB);
+           GenerateDocument(DocumentType.DriverLicenseNumber), DriverLicenseType.AB);
 
        await _uttomUnitOfWork.DelivererRepository.AddAsync(entity);
        await _uttomUnitOfWork.SaveChangesAsync();
@@ -114,5 +115,15 @@ public class AddOrUpdateDriverLicenseCommandHandlerTests
        result.Should().NotBeNull();
        result.Success.Should().BeTrue();
        entity.DriverLicenseImageId.Should().NotBeNullOrEmpty();
+    }
+
+    public void Dispose()
+    {
+        _dbContext.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _dbContext.DisposeAsync();
     }
 }

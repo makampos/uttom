@@ -1,7 +1,7 @@
 using MediatR;
-using Uttom.Domain.Models;
+using Uttom.Application.DTOs;
 using Uttom.Domain.Results;
 
 namespace Uttom.Application.Features.Queries;
 
-public record GetMotorcycleByPlateNumberQuery(string PlateNumber) : IRequest<ResultResponse<Motorcycle>>;
+public record GetMotorcycleByPlateNumberQuery(string PlateNumber) : IRequest<ResultResponse<MotorcycleDto>>;

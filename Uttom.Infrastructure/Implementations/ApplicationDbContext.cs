@@ -36,6 +36,21 @@ public class ApplicationDbContext : DbContext
             .HasIndex(m => m.PlateNumber)
             .IsUnique();
 
+        modelBuilder.Entity<Motorcycle>()
+            .Property(x => x.Identifier)
+            .HasColumnType("varchar(50)")
+            .IsRequired();
+
+        modelBuilder.Entity<Motorcycle>()
+            .Property(x => x.Year)
+            .HasColumnType("int")
+            .IsRequired();
+
+        modelBuilder.Entity<Motorcycle>()
+            .Property(x => x.Model)
+            .HasColumnType("varchar(50)")
+            .IsRequired();
+
         // -- RegisteredMotorcycle
         modelBuilder.Entity<RegisteredMotorcycle>()
             .ToTable("RegisteredMotorcycles")

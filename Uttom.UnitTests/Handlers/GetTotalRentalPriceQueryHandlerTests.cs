@@ -9,10 +9,11 @@ using Uttom.Domain.Interfaces.Repositories;
 using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
+using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
-public class GetTotalRentalPriceQueryHandlerTests
+public class GetTotalRentalPriceQueryHandlerTests : TestHelper, IDisposable, IAsyncDisposable
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly ApplicationDbContext _dbContext;
@@ -25,7 +26,7 @@ public class GetTotalRentalPriceQueryHandlerTests
     public GetTotalRentalPriceQueryHandlerTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .UseInMemoryDatabase(databaseName: "TestDatabase"+Guid.NewGuid())
             .Options;
 
         _dbContext = new ApplicationDbContext(options);
@@ -43,9 +44,9 @@ public class GetTotalRentalPriceQueryHandlerTests
     public async Task Handle_ShouldReturn_TotalPrice_WhenRentalIsFound()
     {
         // Arrange
-        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", "155000");
-        var existingDeliverer = Deliverer.Create("SEA", "Sara Elza Alves", "20.681.653/0001-9",
-            new DateTime(1992, 10, 20), "59375336842", DriverLicenseType.A);
+        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber());
+        var existingDeliverer = Deliverer.Create("SEA", "Sara Elza Alves", GenerateDocument(DocumentType.BusinessTaxId),
+            new DateTime(1992, 10, 20), GenerateDocument(DocumentType.DriverLicenseNumber), DriverLicenseType.A);
 
         var command = new AddRentalCommand(7,
             existingDeliverer.Id,
@@ -76,5 +77,15 @@ public class GetTotalRentalPriceQueryHandlerTests
         result.Should().NotBeNull();
         result.Success.Should().BeTrue();
         result.Data.Should().Be(162m);
+    }
+
+    public void Dispose()
+    {
+        _dbContext.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _dbContext.DisposeAsync();
     }
 }

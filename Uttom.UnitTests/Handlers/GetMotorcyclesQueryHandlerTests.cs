@@ -7,10 +7,11 @@ using Uttom.Domain.Interfaces.Repositories;
 using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
+using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
-public class GetMotorcyclesQueryHandlerTests
+public class GetMotorcyclesQueryHandlerTests : TestHelper, IDisposable, IAsyncDisposable
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly ApplicationDbContext _dbContext;
@@ -23,7 +24,7 @@ public class GetMotorcyclesQueryHandlerTests
     public GetMotorcyclesQueryHandlerTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .UseInMemoryDatabase(databaseName: "TestDatabase"+Guid.NewGuid())
             .Options;
 
         _dbContext = new ApplicationDbContext(options);
@@ -42,7 +43,7 @@ public class GetMotorcyclesQueryHandlerTests
     public async Task Handle_ShouldReturnMotorcycles_WhenMotorcyclesAreFound()
     {
         // Arrange
-        var entity = Motorcycle.Create("Yamaha", 2020, "YZB", "DHA-1234");
+        var entity = Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber());
 
         await _uttomUnitOfWork.MotorcycleRepository.AddAsync(entity);
         await _uttomUnitOfWork.SaveChangesAsync();
@@ -65,9 +66,9 @@ public class GetMotorcyclesQueryHandlerTests
         // Arrange
         var entities = new List<Motorcycle>
         {
-            Motorcycle.Create("Yamaha", 2020, "YZB", "DHA-1234"),
-            Motorcycle.Create("Honda", 2021, "HON", "DHA-1235"),
-            Motorcycle.Create("Suzuki", 2022, "SUZ", "DHA-1236")
+            Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber()),
+            Motorcycle.Create("Honda", 2021, "HON", GeneratePlateNumber()),
+            Motorcycle.Create("Suzuki", 2022, "SUZ", GeneratePlateNumber())
         };
 
         foreach (var entity in entities)
@@ -87,5 +88,15 @@ public class GetMotorcyclesQueryHandlerTests
         result.Success.Should().BeTrue();
         result.Data.TotalCount.Should().Be(3);
         result.Data.Items.Should().HaveCount(3);
+    }
+
+    public void Dispose()
+    {
+        _dbContext.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _dbContext.DisposeAsync();
     }
 }

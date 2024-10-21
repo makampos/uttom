@@ -1,6 +1,6 @@
 using System.Text;
 
-namespace Uttom.IntegrationTests.Helpers;
+namespace Uttom.UnitTests.TestHelpers;
 
 public class TestHelper
 {
@@ -50,4 +50,3 @@ public class TestHelper
         DriverLicenseNumber,
     }
 }
-

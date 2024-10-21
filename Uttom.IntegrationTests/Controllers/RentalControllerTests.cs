@@ -8,10 +8,11 @@ using Uttom.Domain.Enum;
 using Uttom.Domain.Interfaces.Abstractions;
 using Uttom.Domain.Models;
 using Uttom.IntegrationTests.Fixtures;
+using Uttom.IntegrationTests.Helpers;
 
 namespace Uttom.IntegrationTests.Controllers;
 
-public class RentalControllerTests : IClassFixture<CustomWebApplicationFactory>
+public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
@@ -32,7 +33,7 @@ public class RentalControllerTests : IClassFixture<CustomWebApplicationFactory>
             Identifier: "ID1234",
             Year: 2023,
             Model: "ModelX",
-            PlateNumber: "ABC-1234");
+            PlateNumber: GeneratePlateNumber());
 
         var motorcycleResponse = await _client.PostAsJsonAsync("/api/motorcycles", motorcycleCommand);
         motorcycleResponse.EnsureSuccessStatusCode();
@@ -41,9 +42,9 @@ public class RentalControllerTests : IClassFixture<CustomWebApplicationFactory>
         var delivererCommand = new AddDelivererCommand(
             "MM",
             "Matheus",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
-            "123456789",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
 
@@ -77,7 +78,7 @@ public class RentalControllerTests : IClassFixture<CustomWebApplicationFactory>
             Identifier: "ID1234",
             Year: 2023,
             Model: "ModelX",
-            PlateNumber: "ABC-1234");
+            PlateNumber: GeneratePlateNumber());
 
         var motorcycleResponse = await _client.PostAsJsonAsync("/api/motorcycles", motorcycleCommand);
         motorcycleResponse.EnsureSuccessStatusCode();
@@ -85,9 +86,9 @@ public class RentalControllerTests : IClassFixture<CustomWebApplicationFactory>
         var delivererCommand = new AddDelivererCommand(
             "MM",
             "Matheus",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
-            "123456789",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
 
@@ -131,9 +132,9 @@ public class RentalControllerTests : IClassFixture<CustomWebApplicationFactory>
         var delivererCommand = new AddDelivererCommand(
             "MM",
             "Matheus",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
-            "123456789",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
 

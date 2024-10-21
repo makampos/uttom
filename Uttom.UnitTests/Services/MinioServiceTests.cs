@@ -4,7 +4,6 @@ using Uttom.Infrastructure.Services;
 
 namespace Uttom.UnitTests.Services;
 
-//TODO: Crete integration tests or MOQ using NSubstitute
 public class MinioServiceTests
 {
     private readonly MinioService _minioService;
@@ -15,7 +14,6 @@ public class MinioServiceTests
         _minioService = new MinioService();
     }
 
-    // Create a test to upload image
     [Fact]
     public async Task UploadImageAsync_WithValidData_ShouldReturnObjectName()
     {

@@ -8,10 +8,11 @@ using Uttom.Domain.Interfaces.Repositories;
 using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
+using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
-public class AddRentalCommandHandlerTests
+public class AddRentalCommandHandlerTests : TestHelper, IDisposable, IAsyncDisposable
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly ApplicationDbContext _dbContext;
@@ -24,7 +25,7 @@ public class AddRentalCommandHandlerTests
     public AddRentalCommandHandlerTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .UseInMemoryDatabase(databaseName: "TestDatabase"+Guid.NewGuid())
             .Options;
 
         _dbContext = new ApplicationDbContext(options);
@@ -62,7 +63,7 @@ public class AddRentalCommandHandlerTests
     {
         // Arrange
         // Add motorcycle to he database
-        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", "155000");
+        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber());
         await _dbContext.Motorcycles.AddAsync(existingMotorcycle);
         await _dbContext.SaveChangesAsync();
 
@@ -105,9 +106,9 @@ public class AddRentalCommandHandlerTests
     {
         // Arrange
         // Add motorcycle to he database
-        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", "155000");
-        var existingDeliverer = Deliverer.Create("SEA", "Sara Elza Alves", "20.681.653/0001-9",
-            new DateTime(1992, 10, 20), "59375336842", DriverLicenseType.A);
+        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber());
+        var existingDeliverer = Deliverer.Create("SEA", "Sara Elza Alves", GenerateDocument(DocumentType.BusinessTaxId),
+            new DateTime(1992, 10, 20), GenerateDocument(DocumentType.DriverLicenseNumber), DriverLicenseType.A);
         await _uttomUnitOfWork.MotorcycleRepository.AddAsync(existingMotorcycle);
         await _uttomUnitOfWork.DelivererRepository.AddAsync(existingDeliverer);
         await _uttomUnitOfWork.SaveChangesAsync();
@@ -131,9 +132,9 @@ public class AddRentalCommandHandlerTests
     public async Task Handle_WhenDelivererHasDriverLicenseTypeB_ReturnsFailureResult()
     {
         // Add motorcycle to he database
-        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", "155000");
-        var existingDeliverer = Deliverer.Create("SEA", "Sara Elza Alves", "20.681.653/0001-9",
-            new DateTime(1992, 10, 20), "59375336842", DriverLicenseType.B);
+        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber());
+        var existingDeliverer = Deliverer.Create("SEA", "Sara Elza Alves", GenerateDocument(DocumentType.BusinessTaxId),
+            new DateTime(1992, 10, 20), GenerateDocument(DocumentType.DriverLicenseNumber), DriverLicenseType.B);
         await _uttomUnitOfWork.MotorcycleRepository.AddAsync(existingMotorcycle);
         await _uttomUnitOfWork.DelivererRepository.AddAsync(existingDeliverer);
         await _uttomUnitOfWork.SaveChangesAsync();
@@ -156,9 +157,9 @@ public class AddRentalCommandHandlerTests
     [Fact]
     public async Task Handle_WhenSuccessful_ReturnsSuccessResult()
     {
-        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", "155000");
-        var existingDeliverer = Deliverer.Create("SEA", "Sara Elza Alves", "20.681.653/0001-9",
-            new DateTime(1992, 10, 20), "59375336842", DriverLicenseType.A);
+        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber());
+        var existingDeliverer = Deliverer.Create("SEA", "Sara Elza Alves", GenerateDocument(DocumentType.BusinessTaxId),
+            new DateTime(1992, 10, 20), GenerateDocument(DocumentType.DriverLicenseNumber), DriverLicenseType.A);
         await _uttomUnitOfWork.MotorcycleRepository.AddAsync(existingMotorcycle);
         await _uttomUnitOfWork.DelivererRepository.AddAsync(existingDeliverer);
         await _uttomUnitOfWork.SaveChangesAsync();
@@ -186,5 +187,15 @@ public class AddRentalCommandHandlerTests
         rental.StartDate.Should().Be(DateOnly.FromDateTime(DateTime.Today).AddDays(1)); // next day
         rental.EndDate.Should().Be(DateOnly.FromDateTime(DateTime.Today).AddDays(7)); // 7 days rental counting by the start date
         rental.EstimatingEndingDate.Should().Be(DateOnly.FromDateTime(DateTime.Today).AddDays(10));
+    }
+
+    public void Dispose()
+    {
+        _dbContext.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _dbContext.DisposeAsync();
     }
 }

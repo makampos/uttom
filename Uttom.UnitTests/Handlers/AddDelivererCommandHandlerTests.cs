@@ -11,10 +11,11 @@ using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
 using Uttom.Infrastructure.Services;
+using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
-public class AddDelivererCommandHandlerTests
+public class AddDelivererCommandHandlerTests : TestHelper, IDisposable, IAsyncDisposable
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly ApplicationDbContext _dbContext;
@@ -43,9 +44,16 @@ public class AddDelivererCommandHandlerTests
         _minioService = new MinioService();
         _imageService = new ImageService();
 
-        _uttomUnitOfWork = new UttomUnitOfWork(_dbContext, _motorcycleRepository, _registeredMotorCycleRepository, _delivererRepository, _rentalRepository);
+        _uttomUnitOfWork = new UttomUnitOfWork(_dbContext,
+            _motorcycleRepository,
+            _registeredMotorCycleRepository,
+            _delivererRepository,
+            _rentalRepository);
 
-        _handler = new AddDelivererCommandHandler(_uttomUnitOfWork, _minioService, _imageService);
+        _handler = new AddDelivererCommandHandler(
+            _uttomUnitOfWork,
+            _minioService,
+            _imageService);
     }
 
     [Fact]
@@ -55,9 +63,9 @@ public class AddDelivererCommandHandlerTests
         var command = new AddDelivererCommand(
             "SEA",
             "Sara Elza Alves",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1992,10,20),
-            "59375336842",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             3,
             string.Empty);
 
@@ -66,7 +74,7 @@ public class AddDelivererCommandHandlerTests
             "Mariah Catarina Figueiredo",
             command.BusinessTaxId,
             new DateTime(1950,5,2),
-            "96267334780",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             DriverLicenseType.AB), CancellationToken.None);
 
         await _uttomUnitOfWork.SaveChangesAsync();
@@ -89,16 +97,16 @@ public class AddDelivererCommandHandlerTests
         var command = new AddDelivererCommand(
             "SEA",
             "Sara Elza Alves",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1992,10,20),
-            "59375336842",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             3,
             string.Empty);
 
         await _uttomUnitOfWork.DelivererRepository.AddAsync(Deliverer.Create(
             "MCF",
             "Mariah Catarina Figueiredo",
-            "20.681.653/0001-91",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1950,5,2),
             command.DriverLicenseNumber,
             DriverLicenseType.AB), CancellationToken.None);
@@ -125,9 +133,9 @@ public class AddDelivererCommandHandlerTests
         var command = new AddDelivererCommand(
             "MM",
             "Matheus",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1992,10,20),
-            "123456789",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             3,
             base64ImageData);
 
@@ -143,5 +151,15 @@ public class AddDelivererCommandHandlerTests
         var deliverer = await _uttomUnitOfWork.DelivererRepository.GetDelivererByBusinessTaxIdAsync(command.BusinessTaxId, CancellationToken.None);
 
         deliverer.DriverLicenseImageId.Should().NotBeNullOrEmpty();
+    }
+
+    public void Dispose()
+    {
+        _dbContext.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _dbContext.DisposeAsync();
     }
 }

@@ -8,10 +8,11 @@ using Uttom.Domain.Interfaces.Repositories;
 using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
+using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
-public class DeleteMotorcycleCommandHandlerTests
+public class DeleteMotorcycleCommandHandlerTests : TestHelper, IDisposable, IAsyncDisposable
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly ApplicationDbContext _dbContext;
@@ -24,7 +25,7 @@ public class DeleteMotorcycleCommandHandlerTests
     public DeleteMotorcycleCommandHandlerTests()
     {
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
+            .UseInMemoryDatabase(databaseName: "TestDatabase"+Guid.NewGuid())
             .Options;
 
         _dbContext = new ApplicationDbContext(options);
@@ -58,9 +59,9 @@ public class DeleteMotorcycleCommandHandlerTests
     public async Task Handle_ShouldReturnFailureResult_WhenMotorcycleHasRentalRecord()
     {
         // Arrange
-        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", "155000");
-        var existingDeliverer = Deliverer.Create("SEA", "Sara Elza Alves", "20.681.653/0001-9",
-            new DateTime(1992, 10, 20), "59375336842", DriverLicenseType.A);
+        var existingMotorcycle = Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber());
+        var existingDeliverer = Deliverer.Create("SEA", "Sara Elza Alves", GenerateDocument(DocumentType.BusinessTaxId),
+            new DateTime(1992, 10, 20), GenerateDocument(DocumentType.DriverLicenseNumber), DriverLicenseType.A);
         await _uttomUnitOfWork.MotorcycleRepository.AddAsync(existingMotorcycle);
         await _uttomUnitOfWork.DelivererRepository.AddAsync(existingDeliverer);
         await _uttomUnitOfWork.SaveChangesAsync();
@@ -86,7 +87,7 @@ public class DeleteMotorcycleCommandHandlerTests
     public async Task Handle_ShouldReturnSuccessResult_WhenMotorcycleIsDeleted()
     {
         // Arrange
-        var entity = Motorcycle.Create("Yamaha", 2020, "YZB", "DHA-1234");
+        var entity = Motorcycle.Create("Yamaha", 2020, "YZB", GeneratePlateNumber());
 
         await _uttomUnitOfWork.MotorcycleRepository.AddAsync(entity);
         await _uttomUnitOfWork.SaveChangesAsync();
@@ -104,5 +105,15 @@ public class DeleteMotorcycleCommandHandlerTests
 
         deletedEntity.Should().NotBeNull();
         deletedEntity.IsDeleted.Should().BeTrue();
+    }
+
+    public void Dispose()
+    {
+        _dbContext.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _dbContext.DisposeAsync();
     }
 }

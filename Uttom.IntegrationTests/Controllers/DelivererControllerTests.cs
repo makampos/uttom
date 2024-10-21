@@ -6,7 +6,7 @@ using Uttom.Application.Extensions;
 using Uttom.Application.Features.Commands;
 using Uttom.Domain.Interfaces.Abstractions;
 using Uttom.Domain.Interfaces.Services;
-using Uttom.IntegrationTests.Fixtures;
+using Uttom.IntegrationTests.Factories;
 using Uttom.IntegrationTests.Helpers;
 
 namespace Uttom.IntegrationTests.Controllers;

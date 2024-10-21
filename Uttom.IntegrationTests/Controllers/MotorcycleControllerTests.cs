@@ -10,7 +10,7 @@ using Uttom.Application.Features.Queries;
 using Uttom.Domain.Interfaces.Abstractions;
 using Uttom.Domain.Messages;
 using Uttom.Domain.Results;
-using Uttom.IntegrationTests.Fixtures;
+using Uttom.IntegrationTests.Factories;
 using Uttom.IntegrationTests.Helpers;
 
 namespace Uttom.IntegrationTests.Controllers;

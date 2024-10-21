@@ -1,10 +1,12 @@
 using FluentAssertions;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using NSubstitute;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Handlers;
 using Uttom.Domain.Interfaces.Abstractions;
 using Uttom.Domain.Interfaces.Repositories;
+using Uttom.Domain.Messages;
 using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
@@ -13,7 +15,7 @@ using Uttom.UnitTests.TestHelpers;
 namespace Uttom.UnitTests.Handlers;
 
 [Collection("Unit Tests")]
-public class AddMotorcycleCommandHandlerTests : TestHelper, IClassFixture<RabbitMqFixture>
+public class AddMotorcycleCommandHandlerTests : TestHelper, IDisposable, IAsyncDisposable
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly ApplicationDbContext _dbContext;
@@ -22,16 +24,11 @@ public class AddMotorcycleCommandHandlerTests : TestHelper, IClassFixture<Rabbit
     private readonly IRegisteredMotorCycleRepository _registeredMotorCycleRepository;
     private readonly IDelivererRepository _delivererRepository;
     private readonly IRentalRepository _rentalRepository;
-    private readonly RabbitMqFixture _rabbitMqFixture;
 
     private readonly IBusControl _busControl;
 
-    public AddMotorcycleCommandHandlerTests(RabbitMqFixture rabbitMqFixture)
+    public AddMotorcycleCommandHandlerTests()
     {
-        _rabbitMqFixture = rabbitMqFixture;
-
-        _rabbitMqFixture.StartAsync().GetAwaiter().GetResult();
-
         var options = new DbContextOptionsBuilder<ApplicationDbContext>()
             .UseInMemoryDatabase(databaseName: "TestDatabase")
             .Options;
@@ -42,17 +39,13 @@ public class AddMotorcycleCommandHandlerTests : TestHelper, IClassFixture<Rabbit
         _delivererRepository = new DelivererRepository(_dbContext);
         _rentalRepository = new RentalRepository(_dbContext);
 
-        _uttomUnitOfWork = new UttomUnitOfWork(_dbContext, _motorcycleRepository, _registeredMotorCycleRepository, _delivererRepository, _rentalRepository);
+        _uttomUnitOfWork = new UttomUnitOfWork(_dbContext,
+            _motorcycleRepository,
+            _registeredMotorCycleRepository,
+            _delivererRepository,
+            _rentalRepository);
 
-        _busControl = Bus.Factory.CreateUsingRabbitMq(cfg =>
-        {
-            var rabbitMqConnectionString = _rabbitMqFixture.GetRabbitMqConnectionString();
-            cfg.Host(new Uri(rabbitMqConnectionString), h =>
-            {
-                h.Username("guest");
-                h.Password("guest");
-            });
-        });
+        _busControl = Substitute.For<IBusControl>();
 
         _handler = new AddMotorCycleCommandHandler(_uttomUnitOfWork, _busControl);
     }
@@ -61,7 +54,8 @@ public class AddMotorcycleCommandHandlerTests : TestHelper, IClassFixture<Rabbit
     public async Task Handle_ShouldAddMotorcycle_WhenValidCommandIsGiven()
     {
         // Arrange
-        var command = new AddMotorcycleCommand("Yamaha", 2020, "YZB", GeneratePlateNumber());
+        _busControl.Publish(Arg.Any<RegisteredMotorcycle>()).Returns(Task.CompletedTask);
+        var command = new AddMotorcycleCommand("Yamaha", 2024, "YZB", GeneratePlateNumber());
 
         // Act
         var result = await _handler.Handle(command, CancellationToken.None);
@@ -72,7 +66,7 @@ public class AddMotorcycleCommandHandlerTests : TestHelper, IClassFixture<Rabbit
         var motorcycle = await _uttomUnitOfWork.MotorcycleRepository.GetByPlateNumberAsync(command.PlateNumber, false);
         motorcycle.Should().NotBeNull();
         motorcycle.Identifier.Should().Be("Yamaha");
-        motorcycle.Year.Should().Be(2020);
+        motorcycle.Year.Should().Be(2024);
         motorcycle.Model.Should().Be("YZB");
         motorcycle.PlateNumber.Should().Be(command.PlateNumber);
     }
@@ -93,5 +87,15 @@ public class AddMotorcycleCommandHandlerTests : TestHelper, IClassFixture<Rabbit
         // Assert
         result.Success.Should().BeFalse();
         result.ErrorMessage.Should().Be("The plate number must be unique.");
+    }
+
+    public void Dispose()
+    {
+        _dbContext.Dispose();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        await _dbContext.DisposeAsync();
     }
 }

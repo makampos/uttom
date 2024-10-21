@@ -7,7 +7,7 @@ using Uttom.Application.Features.Commands;
 using Uttom.Domain.Enum;
 using Uttom.Domain.Interfaces.Abstractions;
 using Uttom.Domain.Models;
-using Uttom.IntegrationTests.Fixtures;
+using Uttom.IntegrationTests.Factories;
 using Uttom.IntegrationTests.Helpers;
 
 namespace Uttom.IntegrationTests.Controllers;

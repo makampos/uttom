@@ -1,4 +1,3 @@
-using System.Text;
 using DotNet.Testcontainers.Builders;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -9,7 +8,7 @@ using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
 using Uttom.Infrastructure.Implementations;
 
-namespace Uttom.IntegrationTests.Fixtures;
+namespace Uttom.IntegrationTests.Factories;
 
 public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 {
@@ -35,7 +34,6 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(5672))
             .Build();
 
-        // Initialize Minio container
         _minioContainer = new MinioBuilder()
             .WithImage("minio/minio")
             .WithPortBinding(9000)

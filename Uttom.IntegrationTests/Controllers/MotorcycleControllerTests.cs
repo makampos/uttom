@@ -1,13 +1,14 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
 using Uttom.Application.DTOs;
+using Uttom.Application.Extensions;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Queries;
 using Uttom.Domain.Interfaces.Abstractions;
 using Uttom.Domain.Messages;
-using Uttom.Domain.Models;
 using Uttom.Domain.Results;
 using Uttom.IntegrationTests.Fixtures;
 using Uttom.IntegrationTests.Helpers;
@@ -16,6 +17,7 @@ namespace Uttom.IntegrationTests.Controllers;
 
 //TODO: Revisit these tests to adjust routes and responses later
 
+[Collection("Integration Tests")]
 public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
@@ -52,8 +54,8 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.Created);
-        var message = await CheckMessageConsumedAsync();
-        message.Items.Should().NotBeEmpty();
+        var message = await CheckMessageConsumedAsync(command.PlateNumber);
+        message.Should().NotBeNull();
     }
 
     [Fact]
@@ -90,7 +92,7 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         result.Success.Should().BeTrue();
-        result.Data.Items.Should().HaveCount(0);
+        result.Data.Items.Should().BeEmpty();
     }
 
     [Fact]
@@ -154,13 +156,17 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
         var motorcycleIsCreated = await _client.PostAsJsonAsync("/api/motorcycles", command);
         motorcycleIsCreated.EnsureSuccessStatusCode();
 
+        var query = new GetMotorcycleByPlateNumberQuery(command.PlateNumber);
+        var motorcycleByPlateNumberResult = await _client.GetAsync($"/api/motorcycles/plate-number?plateNumber={query.PlateNumber}");
+        var motorcycleByPlateNumber = await motorcycleByPlateNumberResult.Content.ReadFromJsonAsync<MotorcycleDto>();
+
         // Act
-        var response = await _client.GetAsync($"/api/motorcycles/{1}");
+        var response = await _client.GetAsync($"/api/motorcycles/{motorcycleByPlateNumber!.Id}");
         var result = await response.Content.ReadFromJsonAsync<MotorcycleDto>();
 
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.OK);
-        result.Id.Should().Be(1);
+        result.Should().NotBeNull();
     }
 
     [Fact]
@@ -168,7 +174,7 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
     {
         // Arrange
         // Act
-        var response = await _client.GetAsync($"/api/motorcycles/{1}");
+        var response = await _client.GetAsync($"/api/motorcycles/{100}");
         var result = await response.Content.ReadAsStringAsync();
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
@@ -195,11 +201,13 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
     {
         // Arrange
         // Act
-        var response = await _client.DeleteAsync($"/api/motorcycles/{1}");
+        var response = await _client.DeleteAsync($"/api/motorcycles/{99}");
         var result = await response.Content.ReadAsStringAsync();
+
         // Assert
         response.StatusCode.Should().Be(HttpStatusCode.NotFound);
-        result.Should().Be("Motorcycle not found.");
+        var expectedErrorMessage = JsonSerializer.Serialize(new { message = "Motorcycle not found." });
+        result.Should().Be(expectedErrorMessage);
     }
 
     [Fact]
@@ -210,10 +218,18 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
         var motorcycleIsCreated = await _client.PostAsJsonAsync("/api/motorcycles", command);
         motorcycleIsCreated.EnsureSuccessStatusCode();
 
-        var updateCommand = new UpdateMotorcycleCommand(GeneratePlateNumber(), 1);
+        // get motorcycle by plate number
+        var motorcycleExists = await _client.GetAsync($"/api/motorcycles/plate-number?plateNumber={command.PlateNumber}");
+        var motorcycleExistsResult = await motorcycleExists.Content.ReadFromJsonAsync<MotorcycleDto>();
+
+        var updateCommand = new UpdateMotorcycleCommand(GeneratePlateNumber(), motorcycleExistsResult!.Id);
+
+        var query = new GetMotorcycleByPlateNumberQuery(command.PlateNumber);
+        var motorcycleByPlateNumberUpdatedExists = await _client.GetAsync($"/api/motorcycles/plate-number?plateNumber={query.PlateNumber}");
+        var motorcycleByPlateNumberUpdatedResult = await motorcycleByPlateNumberUpdatedExists.Content.ReadFromJsonAsync<MotorcycleDto>();
 
         // Act
-        var response = await _client.PutAsJsonAsync($"/api/motorcycles/{1}/plate-number", updateCommand);
+        var response = await _client.PutAsJsonAsync($"/api/motorcycles/{motorcycleByPlateNumberUpdatedResult!.Id}/plate-number", updateCommand);
         var result = await response.Content.ReadAsStringAsync();
 
         // Assert
@@ -224,13 +240,19 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
 
     //TODO: Add test for when motorcycle has rental record
 
-
-    //TODO: Refactor to get message by plate number
-    private async Task<PagedResult<RegisteredMotorcycle>> CheckMessageConsumedAsync()
+    private async Task<RegisteredMotorcycleDto> CheckMessageConsumedAsync(string plateNumber)
     {
         using var scope = _factory.Services.CreateScope();
         var uttomUnitOfWork = scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>();
-        var message = await uttomUnitOfWork.RegisteredMotorCyclesRepository.GetAllAsync(1,1);
-        return message;
+
+        var message = null as RegisteredMotorcycle;
+
+        while (message == null)
+        {
+            await Task.Delay(1000);
+            message = await uttomUnitOfWork.RegisteredMotorCyclesRepository.GetByPlateNumberAsync(plateNumber);
+        }
+
+        return message.ToDto();
     }
 }

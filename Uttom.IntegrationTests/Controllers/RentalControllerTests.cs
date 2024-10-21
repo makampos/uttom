@@ -12,6 +12,7 @@ using Uttom.IntegrationTests.Helpers;
 
 namespace Uttom.IntegrationTests.Controllers;
 
+[Collection("Integration Tests")]
 public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
@@ -107,6 +108,7 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
 
         var response = await _client.PostAsJsonAsync("/api/rentals", command);
         response.EnsureSuccessStatusCode();
+
 
         // Act
         var rental = await _client.GetAsync($"/api/rentals/{1}");

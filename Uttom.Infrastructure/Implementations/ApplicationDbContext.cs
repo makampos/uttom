@@ -11,7 +11,7 @@ public class ApplicationDbContext : DbContext
         : base(options) { }
 
     public DbSet<Motorcycle> Motorcycles { get; set; }
-    public DbSet<RegisteredMotorcycle> RegisteredMotorcycles { get; set; }
+    public DbSet<RegisteredMotorcycle?> RegisteredMotorcycles { get; set; }
     public DbSet<Deliverer> Deliverers { get; set; }
     public DbSet<Rental> Rentals { get; set; }
 

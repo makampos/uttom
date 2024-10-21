@@ -83,18 +83,4 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
             }
         });
     }
-
-    public string GenerateRandomDigits(int digits)
-    {
-        Random rnd = new Random();
-
-        var businessTaxId = new StringBuilder();
-
-        for (var i = 0; i < digits; i++)
-        {
-            businessTaxId.Append(rnd.Next(10));
-        }
-
-        return businessTaxId.ToString();
-    }
 }

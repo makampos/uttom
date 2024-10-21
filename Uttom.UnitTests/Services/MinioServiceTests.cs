@@ -4,6 +4,7 @@ using Uttom.Infrastructure.Services;
 
 namespace Uttom.UnitTests.Services;
 
+[Collection("Unit Tests")]
 public class MinioServiceTests
 {
     private readonly MinioService _minioService;

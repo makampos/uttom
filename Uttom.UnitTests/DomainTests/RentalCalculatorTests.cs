@@ -3,9 +3,7 @@ using Uttom.Domain.Models;
 
 namespace Uttom.UnitTests.DomainTests;
 
-using System;
-using Xunit;
-
+[Collection("Unit Tests")]
 public class RentalCalculatorTests
 {
     private readonly RentalCalculator _rentalCalculator;

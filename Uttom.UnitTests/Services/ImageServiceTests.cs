@@ -5,6 +5,7 @@ using Uttom.Domain.Interfaces.Services;
 
 namespace Uttom.UnitTests.Services;
 
+[Collection("Unit Tests")]
 public class ImageServiceTests
 {
     private readonly IImageService _imageService = new ImageService();

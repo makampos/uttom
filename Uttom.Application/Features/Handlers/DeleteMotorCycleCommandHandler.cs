@@ -18,14 +18,14 @@ public class DeleteMotorCycleCommandHandler : IRequestHandler<DeleteMotorcycleCo
     {
         var motorcycle = await _uttomUnitOfWork.MotorcycleRepository.GetByIdAsync(request.Id, cancellationToken);
 
-        if (motorcycle == null)
+        if (motorcycle is null)
         {
             return ResultResponse<bool>.FailureResult("Motorcycle not found.");
         }
 
         var rental = await _uttomUnitOfWork.RentalRepository.GetByMotorcycleIdAsync(motorcycle.Id, cancellationToken);
 
-        if (rental != null)
+        if (rental is not null)
         {
             return ResultResponse<bool>.FailureResult("Motorcycle has rental record.");
         }

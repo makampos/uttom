@@ -1,4 +1,5 @@
 using Uttom.Application.DTOs;
+using Uttom.Domain.Messages;
 using Uttom.Domain.Models;
 
 namespace Uttom.Application.Extensions;
@@ -27,6 +28,17 @@ public static class Mappers
             motorcycle.Year,
             motorcycle.Model,
             motorcycle.PlateNumber
+        );
+    }
+
+    public static RegisteredMotorcycleDto ToDto(this RegisteredMotorcycle registeredMotorcycle)
+    {
+        return new RegisteredMotorcycleDto(
+            registeredMotorcycle.Id,
+            registeredMotorcycle.Identifier,
+            registeredMotorcycle.Year,
+            registeredMotorcycle.Model,
+            registeredMotorcycle.PlateNumber
         );
     }
 }

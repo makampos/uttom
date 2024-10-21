@@ -2,10 +2,10 @@ using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 using Uttom.Application.DTOs;
+using Uttom.Application.Extensions;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Queries;
 using Uttom.Domain.Interfaces.Abstractions;
-using Uttom.Domain.Models;
 
 namespace Uttom.API.Controllers;
 
@@ -41,7 +41,7 @@ public class MotorcycleController : ControllerBase
 
     [HttpGet]
     [SwaggerOperation("Get all existing motorcycles")]
-    [SwaggerResponse(StatusCodes.Status200OK)]
+    [SwaggerResponse(StatusCodes.Status200OK, "Motorcycles found", typeof(IEnumerable<MotorcycleDto>))]
     public async Task<IActionResult> GetAllMotorcycles([FromQuery] GetMotorcyclesQuery query)
     {
         var result = await _mediator.Send(query);
@@ -81,16 +81,15 @@ public class MotorcycleController : ControllerBase
 
     [HttpGet("{id}")]
     [SwaggerOperation("Get a motorcycle by id")]
-    [SwaggerResponse(StatusCodes.Status200OK, "Motorcycle found", typeof(Motorcycle))]
+    [SwaggerResponse(StatusCodes.Status200OK, "Motorcycle found", typeof(MotorcycleDto))]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Motorcycle not found")]
     public async Task<IActionResult> GetMotorcycleById(int id)
     {
-        // Add DTO
         var result = await _unitOfWork.MotorcycleRepository.GetByIdAsync(id);
 
         return result is null
             ? NotFound("Motorcycle not found.")
-            : Ok(result);
+            : Ok(result.ToDto());
     }
 
 
@@ -99,12 +98,21 @@ public class MotorcycleController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "Motorcycle deleted")]
     [SwaggerResponse(StatusCodes.Status404NotFound, "Motorcycle not found")]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Motorcycle has rental record, or validation failed")]
-    public async Task<IActionResult> DeleteMotorcycleById([FromRoute] DeleteMotorcycleCommand command)
+    public async Task<IActionResult> DeleteMotorcycleById([FromRoute] int id)
     {
-        var result = await _mediator.Send(command);
+        var result = await _mediator.Send(new DeleteMotorcycleCommand(id));
 
-        return !result.Success
-            ? NotFound("Motorcycle not found.")
-            : Ok(result);
+        return result.Success switch
+        {
+            false when result.ErrorMessage!.Equals("Motorcycle has rental record.") => BadRequest(new
+            {
+                message = result.ErrorMessage
+            }),
+            false when result.ErrorMessage!.Equals("Motorcycle not found.") => NotFound(new
+            {
+                message = result.ErrorMessage
+            }),
+            _ => Ok()
+        };
     }
 }

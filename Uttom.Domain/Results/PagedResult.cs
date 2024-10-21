@@ -21,4 +21,14 @@ public class PagedResult<T>
 
     public bool HasPreviousPage => CurrentPage > 1;
     public bool HasNextPage => CurrentPage < TotalPages;
+
+    public PagedResult<TDto> ToDto<TDto>(Func<T, TDto> converter)
+    {
+        return new PagedResult<TDto>(
+            Items?.Select(converter).ToList(),
+            TotalCount,
+            PageSize,
+            CurrentPage
+        );
+    }
 }

@@ -5,6 +5,7 @@ using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Validators;
 
+[Collection("Unit Tests")]
 public class AddMotorcycleCommandValidatorTests : TestHelper
 {
     private readonly AddMotorcycleCommandValidator _validator;

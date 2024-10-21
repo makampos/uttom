@@ -11,6 +11,7 @@ using Uttom.IntegrationTests.Helpers;
 
 namespace Uttom.IntegrationTests.Controllers;
 
+[Collection("Integration Tests")]
 public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
@@ -30,7 +31,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
         // Arrange
         var command = new AddDelivererCommand(
             "MM",
-            String.Empty,
+            "Matheus",
             GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
             GenerateDocument(DocumentType.DriverLicenseNumber),

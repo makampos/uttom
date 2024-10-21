@@ -44,8 +44,9 @@ jobs:
         env:
           MINIO_ROOT_USER: "minioadmin"
           MINIO_ROOT_PASSWORD: "minioadmin"
+        # Removed the --console-address flag and added server data
         options: >-
-          --console-address ":9090"
+          server /data 
 
     steps:
       - name: Checkout code

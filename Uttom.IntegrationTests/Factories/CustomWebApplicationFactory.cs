@@ -84,17 +84,24 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
         });
     }
 
-    public async Task<Motorcycle> GetMotorcycle(string plateNumber, CustomWebApplicationFactory _factory)
+    public async Task<Motorcycle?> GetMotorcycle(string plateNumber, CustomWebApplicationFactory _factory)
     {
         using var scope = _factory.Services.CreateScope();
         var uttomUnitOfWork = scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>();
         return await uttomUnitOfWork.MotorcycleRepository.GetByPlateNumberAsync(plateNumber, false);
     }
 
-    public async Task<Deliverer> GetDeliverer(string businessTaxId, CustomWebApplicationFactory _factory)
+    public async Task<Deliverer?> GetDeliverer(string businessTaxId, CustomWebApplicationFactory _factory)
     {
         using var scope = _factory.Services.CreateScope();
         var uttomUnitOfWork = scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>();
         return await uttomUnitOfWork.DelivererRepository.GetDelivererByBusinessTaxIdAsync(businessTaxId);
+    }
+
+    public async Task<Rental?> GetRentalByDelivererId(int delivererId, CustomWebApplicationFactory _factory)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var uttomUnitOfWork = scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>();
+        return await uttomUnitOfWork.RentalRepository.GetByDelivererIdAsync(delivererId);
     }
 }

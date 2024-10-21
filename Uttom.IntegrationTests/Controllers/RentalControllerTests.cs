@@ -1,12 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
-using Microsoft.Extensions.DependencyInjection;
 using Uttom.Application.DTOs;
 using Uttom.Application.Features.Commands;
+using Uttom.Application.Features.Queries;
 using Uttom.Domain.Enum;
-using Uttom.Domain.Interfaces.Abstractions;
-using Uttom.Domain.Models;
 using Uttom.IntegrationTests.Factories;
 using Uttom.IntegrationTests.Helpers;
 
@@ -174,5 +172,51 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
         updateResult.Should().NotBeNullOrEmpty();
     }
 
+    [Fact]
+    public async Task GetRentalPrice_Should_Return_Ok_When_Successful()
+    {
+        // Arrange
+        var motorcycleCommand = new AddMotorcycleCommand(
+            Identifier: "ID1234",
+            Year: 2023,
+            Model: "ModelX",
+            PlateNumber: GeneratePlateNumber());
 
+        var motorcycleResponse = await _client.PostAsJsonAsync("/motos", motorcycleCommand);
+        motorcycleResponse.EnsureSuccessStatusCode();
+
+        var delivererCommand = new AddDelivererCommand(
+            "MM",
+            "Matheus",
+            GenerateDocument(DocumentType.BusinessTaxId),
+            new DateTime(1990, 1, 1),
+            GenerateDocument(DocumentType.DriverLicenseNumber),
+            1,
+            null);
+
+        var delivererResponse = await _client.PostAsJsonAsync("/entregadores", delivererCommand);
+        delivererResponse.EnsureSuccessStatusCode();
+
+        var motorcycleId = await _factory.GetMotorcycle(motorcycleCommand.PlateNumber, _factory);
+        var delivererId = await _factory.GetDeliverer(delivererCommand.BusinessTaxId, _factory);
+
+        var command = new AddRentalCommand(
+            PlanId: RentalPlans.GetPlan(7)!.Days,
+            DeliverId: delivererId.Id,
+            MotorcycleId: motorcycleId.Id,
+            StartDate: DateOnly.FromDateTime(DateTime.Today),
+            EstimatingEndingDate: DateOnly.FromDateTime(DateTime.Today.AddDays(8)));
+
+        var response = await _client.PostAsJsonAsync("/locacao", command);
+
+        response.EnsureSuccessStatusCode();
+
+        var existingRental = await _factory.GetRentalByDelivererId(delivererId.Id, _factory);
+        var query = new GetTotalRentalPriceQueryString(DateOnly.FromDateTime(DateTime.Today.AddDays(10)));
+
+        var rental = await _client.GetAsync($"/locacao/{existingRental!.Id}/devolucao?DataDevolucao={query.DataDevolucao:yyyy-MM-dd}");
+
+        rental.EnsureSuccessStatusCode();
+        rental.StatusCode.Should().Be(HttpStatusCode.OK);
+    }
 }

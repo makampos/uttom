@@ -8,7 +8,7 @@ using Uttom.Domain.Results;
 
 namespace Uttom.Application.Features.Handlers;
 
-public class GetTotalRentalPriceQueryHandler : IRequestHandler<CalculateTotalRentalPriceQuery, ResultResponse<decimal>>
+public class GetTotalRentalPriceQueryHandler : IRequestHandler<GetTotalRentalPriceQuery, ResultResponse<decimal>>
 {
     private readonly IUttomUnitOfWork _uttomUnitOfWork;
     private readonly RentalCalculator _rentalCalculator = new();
@@ -20,7 +20,7 @@ public class GetTotalRentalPriceQueryHandler : IRequestHandler<CalculateTotalRen
         _logger = logger;
     }
 
-    public async Task<ResultResponse<decimal>> Handle(CalculateTotalRentalPriceQuery request, CancellationToken cancellationToken)
+    public async Task<ResultResponse<decimal>> Handle(GetTotalRentalPriceQuery request, CancellationToken cancellationToken)
     {
         try
         {

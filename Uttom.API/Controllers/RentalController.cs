@@ -32,6 +32,19 @@ public class RentalController : ControllerBase
             : CreatedAtAction(null, null);
     }
 
+    [HttpGet("{id}/devolucao")]
+    [SwaggerOperation(Summary = "Get rental price", Description = "Get rental price.")]
+    [SwaggerResponse(StatusCodes.Status200OK, "Total Rental Price", typeof(decimal))]
+    [SwaggerResponse(StatusCodes.Status400BadRequest, "Validation error")]
+    public async Task<IActionResult> GetRentalPrice([FromRoute] int id, [FromQuery] GetTotalRentalPriceQueryString query)
+    {
+        var result = await _mediator.Send(new GetTotalRentalPriceQuery(id, query.DataDevolucao));
+
+        return !result.Success
+            ? BadRequest(result.ErrorMessage)
+            : Ok(result.Data);
+    }
+
     [HttpGet("{id}")]
     [SwaggerOperation(Summary = "Retrieve a rental by its ID", Description = "Returns rental details for the specified ID.")]
     [SwaggerResponse(StatusCodes.Status200OK, "Rental found", typeof(RentalDto))]

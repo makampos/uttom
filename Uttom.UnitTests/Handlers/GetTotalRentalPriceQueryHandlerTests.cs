@@ -71,7 +71,7 @@ public class GetTotalRentalPriceQueryHandlerTests : TestHelper, IDisposable, IAs
         await _uttomUnitOfWork.SaveChangesAsync();
 
         var actualReturnDate = endDate.AddDays(-2);
-        var query = new CalculateTotalRentalPriceQuery(rentalEntity.Id, actualReturnDate);
+        var query = new GetTotalRentalPriceQuery(rentalEntity.Id, actualReturnDate);
 
         // Act
         var result = await _handler.Handle(query, CancellationToken.None);

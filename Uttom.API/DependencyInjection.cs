@@ -1,3 +1,5 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
 using Uttom.Domain.Interfaces.Abstractions;
@@ -7,6 +9,7 @@ using Uttom.Infrastructure.Repositories;
 using Microsoft.OpenApi.Models;
 using Uttom.Application.Consumers;
 using Uttom.Application.Features.Handlers;
+using Uttom.Application.Validators;
 using Uttom.Domain.Interfaces.Services;
 using Uttom.Infrastructure.Services;
 
@@ -22,7 +25,8 @@ public static class DependencyInjection
             .RegisterMediatR()
             .RegisterBus(configuration)
             .RegisterServices()
-            .RegisterSwagger();
+            .RegisterSwagger()
+            .RegisterValidators();
 
         return services;
     }
@@ -110,6 +114,13 @@ public static class DependencyInjection
             // c.IncludeXmlComments(xmlPath);
         });
 
+        return services;
+    }
+
+    private static IServiceCollection RegisterValidators(this IServiceCollection services)
+    {
+        services.AddValidatorsFromAssemblyContaining<AddDelivererCommandValidator>();
+        services.AddFluentValidationAutoValidation();
         return services;
     }
 }

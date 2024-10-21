@@ -1,3 +1,4 @@
+using System.Text;
 using DotNet.Testcontainers.Builders;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -45,28 +46,10 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
 
     public async Task InitializeAsync()
     {
-        // should I get rabbit connection string before starting?
         await _postgresContainer.StartAsync();
         await _rabbitMqContainer.StartAsync();
         await _minioContainer.StartAsync();
-
-        // var configuration = new ConfigurationBuilder()
-        //     .AddInMemoryCollection(new Dictionary<string, string>
-        //     {
-        //         {"RabbitMq:Host", _rabbitMqContainer.Hostname},
-        //         {"RabbitMq:Port", _rabbitMqContainer.GetMappedPublicPort(5672).ToString()},
-        //         {"RabbitMq:Username", "guest"},
-        //         {"RabbitMq:Password", "guest"},
-        //         {"Minio:Endpoint", $"{_minioContainer.Hostname}:{_minioContainer.GetMappedPublicPort(9000)}"},
-        //         {"Minio:AccessKey", "minioadmin"},
-        //         {"Minio:SecretKey", "minioadmin"}
-        //     }!)
-        //     .Build();
-
     }
-
-    public string GetRabbitMqConnectionString()
-        => $"amqp://guest:guest@{_rabbitMqContainer.Hostname}:{_rabbitMqContainer.GetMappedPublicPort(5672)}";
 
     protected override async void Dispose(bool disposing)
     {
@@ -97,8 +80,20 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
                 dbContext.Database.Migrate();
             }
-
-            //
         });
+    }
+
+    public string GenerateRandomDigits(int digits)
+    {
+        Random rnd = new Random();
+
+        var businessTaxId = new StringBuilder();
+
+        for (var i = 0; i < digits; i++)
+        {
+            businessTaxId.Append(rnd.Next(10));
+        }
+
+        return businessTaxId.ToString();
     }
 }

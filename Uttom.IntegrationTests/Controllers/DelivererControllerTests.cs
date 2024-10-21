@@ -7,10 +7,11 @@ using Uttom.Application.Features.Commands;
 using Uttom.Domain.Interfaces.Abstractions;
 using Uttom.Domain.Interfaces.Services;
 using Uttom.IntegrationTests.Fixtures;
+using Uttom.IntegrationTests.Helpers;
 
 namespace Uttom.IntegrationTests.Controllers;
 
-public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactory>
+public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebApplicationFactory>
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
@@ -29,10 +30,10 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         // Arrange
         var command = new AddDelivererCommand(
             "MM",
-            "Matheus",
-            "20.681.653/0001-90",
+            String.Empty,
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
-            "123456789",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
 
@@ -51,9 +52,9 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         var command = new AddDelivererCommand(
             "MM",
             "Matheus",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
-            "123456789",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
         var response = await _client.PostAsJsonAsync("/api/deliverers", command);
@@ -64,7 +65,7 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
             "Another Deliverer",
             command.BusinessTaxId,
             new DateTime(1990, 1, 1),
-            "22345678900",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
 
@@ -84,9 +85,9 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         var command = new AddDelivererCommand(
             "MM",
             "Matheus",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
-            "123456789",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
         var response = await _client.PostAsJsonAsync("/api/deliverers", command);
@@ -95,7 +96,7 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         var anotherCommandWithExistingDriverLicenseNumber = new AddDelivererCommand(
             "AD",
             "Another Deliverer",
-            "31.121.666/0001-40",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
             command.DriverLicenseNumber,
             1,
@@ -119,9 +120,9 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         var command = new AddDelivererCommand(
             "mm",
             "Matheus",
-            "31.121.666/0001-40",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
-            "12345678900",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             base64ImageData);
 
@@ -142,9 +143,9 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         var command = new AddDelivererCommand(
             "MM",
             "Matheus",
-            "31.121.666/0001-40",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
-            "12345678900",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             base64ImageData);
 
@@ -161,7 +162,8 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         var deliverer = await scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>()
             .DelivererRepository.GetDelivererByBusinessTaxIdAsync(command.BusinessTaxId);
 
-        scope.ServiceProvider.GetRequiredService<IMinioService>().GetImageAsync(deliverer!.DriverLicenseImageId!).Should().NotBeNull();
+        scope.ServiceProvider.GetRequiredService<IMinioService>().GetImageAsync(deliverer!.DriverLicenseImageId!)
+            .Should().NotBeNull();
     }
 
     [Fact]
@@ -171,9 +173,9 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         var command = new AddDelivererCommand(
             "MM",
             "Matheus",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
-            "123456789",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
         var response = await _client.PostAsJsonAsync("/api/deliverers", command);
@@ -199,9 +201,9 @@ public class DelivererControllerTests : IClassFixture<CustomWebApplicationFactor
         var command = new AddDelivererCommand(
             "MM",
             "Matheus",
-            "20.681.653/0001-90",
+            GenerateDocument(DocumentType.BusinessTaxId),
             new DateTime(1990, 1, 1),
-            "123456789",
+            GenerateDocument(DocumentType.DriverLicenseNumber),
             1,
             null);
         var response = await _client.PostAsJsonAsync("/api/deliverers", command);

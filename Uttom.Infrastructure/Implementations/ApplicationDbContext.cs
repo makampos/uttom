@@ -87,7 +87,7 @@ public class ApplicationDbContext : DbContext
 
         modelBuilder.Entity<Deliverer>()
             .Property(x => x.BusinessTaxId)
-            .HasColumnType("varchar(50)")
+            .HasColumnType("varchar(14)")
             .IsRequired();
 
         modelBuilder.Entity<Deliverer>()

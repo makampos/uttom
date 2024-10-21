@@ -1,7 +1,6 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Uttom.Application.Extensions;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Handlers;
 using Uttom.Domain.Enum;
@@ -12,6 +11,7 @@ using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
 using Uttom.Infrastructure.Services;
+using Uttom.Infrastructure.TestData;
 using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
@@ -29,8 +29,6 @@ public class AddOrUpdateDriverLicenseCommandHandlerTests : TestHelper, IDisposab
     private readonly IMinioService _minioService;
     private readonly IImageService _imageService;
     private readonly ILogger<AddOrUpdateDriverLicenseCommandHandler> _logger;
-
-    private const string PATH = "TestData/Images";
 
     public AddOrUpdateDriverLicenseCommandHandlerTests()
     {
@@ -82,7 +80,7 @@ public class AddOrUpdateDriverLicenseCommandHandlerTests : TestHelper, IDisposab
         await _uttomUnitOfWork.DelivererRepository.AddAsync(entity);
         await _uttomUnitOfWork.SaveChangesAsync();
 
-        var base64ImageData = StringExtensions.ConvertToBase64($"{PATH}/cnh.jpeg");
+        var base64ImageData = ImageConverter.ConvertToBase64("cnh.jpeg");
 
         // Act
         var result = await _handler.Handle(new AddOrUpdateDriverLicenseCommand(base64ImageData, entity.Id), CancellationToken.None);
@@ -107,7 +105,7 @@ public class AddOrUpdateDriverLicenseCommandHandlerTests : TestHelper, IDisposab
        await _uttomUnitOfWork.DelivererRepository.AddAsync(entity);
        await _uttomUnitOfWork.SaveChangesAsync();
 
-       var base64ImageData = StringExtensions.ConvertToBase64($"{PATH}/cnh.png");
+       var base64ImageData = ImageConverter.ConvertToBase64("cnh.png");
 
        var entityWithoutImage = await _uttomUnitOfWork.DelivererRepository.GetByIdAsync(entity.Id);
        entityWithoutImage!.DriverLicenseImageId.Should().BeNullOrEmpty();

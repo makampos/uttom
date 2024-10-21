@@ -2,10 +2,10 @@ using System.Net;
 using System.Net.Http.Json;
 using FluentAssertions;
 using Microsoft.Extensions.DependencyInjection;
-using Uttom.Application.Extensions;
 using Uttom.Application.Features.Commands;
 using Uttom.Domain.Interfaces.Abstractions;
 using Uttom.Domain.Interfaces.Services;
+using Uttom.Infrastructure.TestData;
 using Uttom.IntegrationTests.Factories;
 using Uttom.IntegrationTests.Helpers;
 
@@ -16,7 +16,6 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
 {
     private readonly HttpClient _client;
     private readonly CustomWebApplicationFactory _factory;
-    private const string PATH = "TestData/Images";
 
     public DelivererControllerTests(CustomWebApplicationFactory factory)
     {
@@ -117,7 +116,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
     public async Task CreateDeliverer_Should_Return_BadRequest_When_Invalid_Image_Extension()
     {
         // Arrange
-        var base64ImageData = StringExtensions.ConvertToBase64($"{PATH}/cnh.jpeg");
+        var base64ImageData = ImageConverter.ConvertToBase64("cnh.jpeg");
         var command = new AddDelivererCommand(
             "mm",
             "Matheus",
@@ -140,7 +139,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
     public async Task CreateDeliverer_Should_Upload_Image_To_Storage()
     {
         // Arrange
-        var base64ImageData = StringExtensions.ConvertToBase64($"{PATH}/cnh.png");
+        var base64ImageData = ImageConverter.ConvertToBase64("cnh.png");
         var command = new AddDelivererCommand(
             "MM",
             "Matheus",
@@ -185,7 +184,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
         var deliverer = await _factory.Server.Services.CreateScope().ServiceProvider.GetRequiredService<IUttomUnitOfWork>()
             .DelivererRepository.GetDelivererByBusinessTaxIdAsync(command.BusinessTaxId);
 
-        var driverLicenseCommand = new AddOrUpdateDriverLicenseCommand(StringExtensions.ConvertToBase64($"{PATH}/cnh.png"), deliverer!.Id);
+        var driverLicenseCommand = new AddOrUpdateDriverLicenseCommand(ImageConverter.ConvertToBase64("cnh.png"), deliverer!.Id);
 
         // Act
         var responseUploadImage = await _client.PostAsJsonAsync($"/entregadores/{deliverer.Id}/cnh", driverLicenseCommand);
@@ -213,7 +212,7 @@ public class DelivererControllerTests : TestHelper, IClassFixture<CustomWebAppli
         var deliverer = await _factory.Server.Services.CreateScope().ServiceProvider.GetRequiredService<IUttomUnitOfWork>()
             .DelivererRepository.GetDelivererByBusinessTaxIdAsync(command.BusinessTaxId);
 
-        var driverLicenseCommand = new AddOrUpdateDriverLicenseCommand(StringExtensions.ConvertToBase64($"{PATH}/cnh.jpeg"), deliverer!.Id);
+        var driverLicenseCommand = new AddOrUpdateDriverLicenseCommand(ImageConverter.ConvertToBase64("cnh.jpeg"), deliverer!.Id);
 
         // Act
         var responseUploadImage = await _client.PostAsJsonAsync($"/entregadores/{deliverer.Id}/cnh", driverLicenseCommand);

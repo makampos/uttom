@@ -19,8 +19,4 @@
       <ProjectReference Include="..\Uttom.Domain\Uttom.Domain.csproj" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Mappers\" />
-    </ItemGroup>
-
 </Project>

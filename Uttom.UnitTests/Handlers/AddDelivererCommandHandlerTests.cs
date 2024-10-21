@@ -1,7 +1,6 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
-using Uttom.Application.Extensions;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Handlers;
 using Uttom.Domain.Enum;
@@ -12,6 +11,7 @@ using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 using Uttom.Infrastructure.Repositories;
 using Uttom.Infrastructure.Services;
+using Uttom.Infrastructure.TestData;
 using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
@@ -29,8 +29,6 @@ public class AddDelivererCommandHandlerTests : TestHelper, IDisposable, IAsyncDi
     private readonly IMinioService _minioService;
     private readonly IImageService _imageService;
     private readonly ILogger<AddDelivererCommandHandler> _logger;
-
-    private const string PATH = "TestData/Images";
 
     public AddDelivererCommandHandlerTests()
     {
@@ -133,7 +131,7 @@ public class AddDelivererCommandHandlerTests : TestHelper, IDisposable, IAsyncDi
     public async Task Handle_ShouldReturnSuccessResult_WhenDelivererIsAdded()
     {
         // Arrange
-         var base64ImageData = StringExtensions.ConvertToBase64($"{PATH}/cnh.png");
+         var base64ImageData = ImageConverter.ConvertToBase64("cnh.png");
 
         var command = new AddDelivererCommand(
             "MM",

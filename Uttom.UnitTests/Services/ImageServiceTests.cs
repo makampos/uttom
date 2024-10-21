@@ -1,7 +1,7 @@
 using FluentAssertions;
-using Uttom.Application.Extensions;
 using Uttom.Domain.Interfaces.Abstractions;
 using Uttom.Domain.Interfaces.Services;
+using Uttom.Infrastructure.TestData;
 
 namespace Uttom.UnitTests.Services;
 
@@ -9,7 +9,6 @@ namespace Uttom.UnitTests.Services;
 public class ImageServiceTests
 {
     private readonly IImageService _imageService = new ImageService();
-    private const string PATH = "TestData/Images";
 
     [Fact]
     public void ValidateImageExtension_ShouldReturnFalse_WhenBase64ImageDataIsNull()
@@ -39,10 +38,10 @@ public class ImageServiceTests
 
     [Theory]
     [InlineData("cnh.jpeg")]
-    public void ValidateImageExtension_ShouldReturnFalse_WhenBase64ImageDataIsNotPngOrBmp(string imageName)
+    public void ValidateImageExtension_ShouldReturnFalse_WhenBase64ImageDataIsNotPngOrBmp(string fileName)
     {
         // Arrange
-        var base64ImageData = StringExtensions.ConvertToBase64($"{PATH}/{imageName}");
+        var base64ImageData = ImageConverter.ConvertToBase64(fileName);
 
         // Act
         var result = _imageService.ValidateImageExtension(base64ImageData);
@@ -54,10 +53,10 @@ public class ImageServiceTests
     [Theory]
     [InlineData("cnh.png")]
     [InlineData("cnh.bmp")]
-    public void ValidateImageExtension_ShouldReturnTrue_WhenBase64ImageDataIsValid(string imageName)
+    public void ValidateImageExtension_ShouldReturnTrue_WhenBase64ImageDataIsValid(string fileName)
     {
         // Arrange
-        var base64ImageData = StringExtensions.ConvertToBase64($"{PATH}/{imageName}");
+        var base64ImageData = ImageConverter.ConvertToBase64(fileName);
 
         // Act
         var result = _imageService.ValidateImageExtension(base64ImageData);

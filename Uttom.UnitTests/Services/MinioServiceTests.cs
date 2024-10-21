@@ -1,6 +1,6 @@
 using FluentAssertions;
-using Uttom.Application.Extensions;
 using Uttom.Infrastructure.Services;
+using Uttom.Infrastructure.TestData;
 
 namespace Uttom.UnitTests.Services;
 
@@ -8,7 +8,6 @@ namespace Uttom.UnitTests.Services;
 public class MinioServiceTests
 {
     private readonly MinioService _minioService;
-    private const string PATH = "TestData/Images";
 
     public MinioServiceTests()
     {
@@ -20,7 +19,7 @@ public class MinioServiceTests
     {
         // Arrange
         var delivererId = 1;
-        var base64ImageData = StringExtensions.ConvertToBase64($"{PATH}/cnh.png");
+        var base64ImageData = ImageConverter.ConvertToBase64("cnh.png");
 
         // Act
         var objectName = await _minioService.UploadImageAsync(delivererId, base64ImageData);

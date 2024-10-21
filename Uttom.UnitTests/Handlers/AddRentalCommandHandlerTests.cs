@@ -1,46 +1,20 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Handlers;
 using Uttom.Domain.Enum;
-using Uttom.Domain.Interfaces.Abstractions;
-using Uttom.Domain.Interfaces.Repositories;
 using Uttom.Domain.Models;
-using Uttom.Infrastructure.Implementations;
-using Uttom.Infrastructure.Repositories;
-using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
 [Collection("Unit Tests")]
-public class AddRentalCommandHandlerTests : TestHelper, IDisposable, IAsyncDisposable
+public class AddRentalCommandHandlerTests : BaseTestHandler<AddRentalCommandHandler>
 {
-    private readonly IUttomUnitOfWork _uttomUnitOfWork;
-    private readonly ApplicationDbContext _dbContext;
     private readonly AddRentalCommandHandler _handler;
-    private readonly MotorcycleRepository _motorcycleRepository;
-    private readonly IRegisteredMotorCycleRepository _registeredMotorCycleRepository;
-    private readonly IDelivererRepository _delivererRepository;
-    private readonly IRentalRepository _rentalRepository;
-    private readonly ILogger<AddRentalCommandHandler> _logger;
 
     public AddRentalCommandHandlerTests()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase"+Guid.NewGuid())
-            .Options;
-
-        _dbContext = new ApplicationDbContext(options);
-        _motorcycleRepository = new MotorcycleRepository(_dbContext);
-        _registeredMotorCycleRepository = new RegisteredMotorCycleRepository(_dbContext);
-        _delivererRepository = new DelivererRepository(_dbContext);
-        _rentalRepository = new RentalRepository(_dbContext);
-        _logger = new Logger<AddRentalCommandHandler>(new LoggerFactory());
-
-        _uttomUnitOfWork = new UttomUnitOfWork(_dbContext, _motorcycleRepository, _registeredMotorCycleRepository, _delivererRepository, _rentalRepository);
-
-        _handler = new AddRentalCommandHandler(_uttomUnitOfWork, _logger);
+        _handler = CreateHandler(parameters: new object[] { _uttomUnitOfWork, _logger });
     }
 
     [Fact]
@@ -191,15 +165,5 @@ public class AddRentalCommandHandlerTests : TestHelper, IDisposable, IAsyncDispo
         rental.StartDate.Should().Be(DateOnly.FromDateTime(DateTime.Today).AddDays(1)); // next day
         rental.EndDate.Should().Be(DateOnly.FromDateTime(DateTime.Today).AddDays(7)); // 7 days rental counting by the start date
         rental.EstimatingEndingDate.Should().Be(DateOnly.FromDateTime(DateTime.Today).AddDays(10));
-    }
-
-    public void Dispose()
-    {
-        _dbContext.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _dbContext.DisposeAsync();
     }
 }

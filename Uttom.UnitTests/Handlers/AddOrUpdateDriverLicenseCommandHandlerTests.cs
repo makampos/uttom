@@ -1,55 +1,21 @@
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Handlers;
 using Uttom.Domain.Enum;
-using Uttom.Domain.Interfaces.Abstractions;
-using Uttom.Domain.Interfaces.Repositories;
-using Uttom.Domain.Interfaces.Services;
 using Uttom.Domain.Models;
-using Uttom.Infrastructure.Implementations;
-using Uttom.Infrastructure.Repositories;
-using Uttom.Infrastructure.Services;
 using Uttom.Infrastructure.TestData;
-using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
 [Collection("Unit Tests")]
-public class AddOrUpdateDriverLicenseCommandHandlerTests : TestHelper, IDisposable, IAsyncDisposable
+public class AddOrUpdateDriverLicenseCommandHandlerTests : BaseTestHandler<AddOrUpdateDriverLicenseCommandHandler>
 {
-    private readonly IUttomUnitOfWork _uttomUnitOfWork;
-    private readonly ApplicationDbContext _dbContext;
     private readonly AddOrUpdateDriverLicenseCommandHandler _handler;
-    private readonly MotorcycleRepository _motorcycleRepository;
-    private readonly IRegisteredMotorCycleRepository _registeredMotorCycleRepository;
-    private readonly IDelivererRepository _delivererRepository;
-    private readonly IRentalRepository _rentalRepository;
-    private readonly IMinioService _minioService;
-    private readonly IImageService _imageService;
-    private readonly ILogger<AddOrUpdateDriverLicenseCommandHandler> _logger;
 
     public AddOrUpdateDriverLicenseCommandHandlerTests()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase"+Guid.NewGuid())
-            .Options;
-
-        _dbContext = new ApplicationDbContext(options);
-        _motorcycleRepository = new MotorcycleRepository(_dbContext);
-        _registeredMotorCycleRepository = new RegisteredMotorCycleRepository(_dbContext);
-        _delivererRepository = new DelivererRepository(_dbContext);
-        _rentalRepository = new RentalRepository(_dbContext);
-        _minioService = new MinioService();
-        _imageService = new ImageService();
-        _logger = new Logger<AddOrUpdateDriverLicenseCommandHandler>(new LoggerFactory());
-
-        _uttomUnitOfWork = new UttomUnitOfWork(_dbContext, _motorcycleRepository, _registeredMotorCycleRepository, _delivererRepository, _rentalRepository);
-
-        _handler = new AddOrUpdateDriverLicenseCommandHandler(_uttomUnitOfWork, _minioService, _imageService, _logger);
+        _handler = CreateHandler(parameters: new object[] { _uttomUnitOfWork, _minioService, _imageService, _logger });
     }
-
 
     [Fact]
     public async Task Handle_ShouldReturnFailureResult_WhenDelivererIsNotFound()
@@ -117,15 +83,5 @@ public class AddOrUpdateDriverLicenseCommandHandlerTests : TestHelper, IDisposab
        result.Should().NotBeNull();
        result.Success.Should().BeTrue();
        entity.DriverLicenseImageId.Should().NotBeNullOrEmpty();
-    }
-
-    public void Dispose()
-    {
-        _dbContext.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _dbContext.DisposeAsync();
     }
 }

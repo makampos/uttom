@@ -1,45 +1,18 @@
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Uttom.Application.Features.Handlers;
 using Uttom.Application.Features.Queries;
-using Uttom.Domain.Interfaces.Abstractions;
-using Uttom.Domain.Interfaces.Repositories;
 using Uttom.Domain.Models;
-using Uttom.Infrastructure.Implementations;
-using Uttom.Infrastructure.Repositories;
-using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
 [Collection("Unit Tests")]
-public class GetMotorcycleByPlateNumberQueryHandlerTests : TestHelper, IDisposable, IAsyncDisposable
+public class GetMotorcycleByPlateNumberQueryHandlerTests : BaseTestHandler<GetMotorCycleByPlateNumberQueryHandler>
 {
-    private readonly IUttomUnitOfWork _uttomUnitOfWork;
-    private readonly ApplicationDbContext _dbContext;
     private readonly GetMotorCycleByPlateNumberQueryHandler _handler;
-    private readonly MotorcycleRepository _motorcycleRepository;
-    private readonly IRegisteredMotorCycleRepository _registeredMotorCycleRepository;
-    private readonly IDelivererRepository _delivererRepository;
-    private readonly IRentalRepository _rentalRepository;
-    private readonly ILogger<GetMotorCycleByPlateNumberQueryHandler> _logger;
 
     public GetMotorcycleByPlateNumberQueryHandlerTests()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase"+Guid.NewGuid())
-            .Options;
-
-        _dbContext = new ApplicationDbContext(options);
-        _motorcycleRepository = new MotorcycleRepository(_dbContext);
-        _registeredMotorCycleRepository = new RegisteredMotorCycleRepository(_dbContext);
-        _delivererRepository = new DelivererRepository(_dbContext);
-        _rentalRepository = new RentalRepository(_dbContext);
-        _logger = new Logger<GetMotorCycleByPlateNumberQueryHandler>(new LoggerFactory());
-
-        _uttomUnitOfWork = new UttomUnitOfWork(_dbContext, _motorcycleRepository, _registeredMotorCycleRepository, _delivererRepository, _rentalRepository);
-
-        _handler = new GetMotorCycleByPlateNumberQueryHandler(_uttomUnitOfWork, _logger);
+        _handler = CreateHandler(_uttomUnitOfWork, _logger);
     }
 
     [Fact]
@@ -77,15 +50,5 @@ public class GetMotorcycleByPlateNumberQueryHandlerTests : TestHelper, IDisposab
         result.Success.Should().BeTrue();
         result.Data.Should().NotBeNull();
         result.Data!.PlateNumber.Should().Be(entity.PlateNumber);
-    }
-
-    public void Dispose()
-    {
-        _dbContext.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _dbContext.DisposeAsync();
     }
 }

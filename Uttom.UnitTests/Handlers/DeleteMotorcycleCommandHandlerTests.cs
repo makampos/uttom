@@ -1,49 +1,22 @@
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Handlers;
 using Uttom.Domain.Enum;
-using Uttom.Domain.Interfaces.Abstractions;
-using Uttom.Domain.Interfaces.Repositories;
 using Uttom.Domain.Models;
-using Uttom.Infrastructure.Implementations;
-using Uttom.Infrastructure.Repositories;
-using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
 [Collection("Unit Tests")]
-public class DeleteMotorcycleCommandHandlerTests : TestHelper, IDisposable, IAsyncDisposable
+public class DeleteMotorcycleCommandHandlerTests : BaseTestHandler<DeleteMotorCycleCommandHandler>
 {
-    private readonly IUttomUnitOfWork _uttomUnitOfWork;
-    private readonly ApplicationDbContext _dbContext;
-    private readonly DeleteMotorCycleCommandHandler _handler;
-    private readonly MotorcycleRepository _motorcycleRepository;
-    private readonly IRegisteredMotorCycleRepository _registeredMotorCycleRepository;
-    private readonly IDelivererRepository _delivererRepository;
-    private readonly IRentalRepository _rentalRepository;
-    private readonly ILogger<DeleteMotorCycleCommandHandler> _logger;
+   private readonly DeleteMotorCycleCommandHandler _handler;
 
-    public DeleteMotorcycleCommandHandlerTests()
-    {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase"+Guid.NewGuid())
-            .Options;
+   public DeleteMotorcycleCommandHandlerTests()
+   {
+       _handler = CreateHandler(parameters: new object[] { _uttomUnitOfWork, _logger });
+   }
 
-        _dbContext = new ApplicationDbContext(options);
-        _motorcycleRepository = new MotorcycleRepository(_dbContext);
-        _registeredMotorCycleRepository = new RegisteredMotorCycleRepository(_dbContext);
-        _delivererRepository = new DelivererRepository(_dbContext);
-        _rentalRepository = new RentalRepository(_dbContext);
-        _logger = new Logger<DeleteMotorCycleCommandHandler>(new LoggerFactory());
-
-        _uttomUnitOfWork = new UttomUnitOfWork(_dbContext, _motorcycleRepository, _registeredMotorCycleRepository, _delivererRepository, _rentalRepository);
-
-        _handler = new DeleteMotorCycleCommandHandler(_uttomUnitOfWork, _logger);
-    }
-
-    [Fact]
+   [Fact]
     public async Task Handle_ShouldReturnFailureResult_WhenMotorcycleIsNotFound()
     {
         // Arrange
@@ -58,7 +31,6 @@ public class DeleteMotorcycleCommandHandlerTests : TestHelper, IDisposable, IAsy
         result.ErrorMessage.Should().Be("Motorcycle not found.");
     }
 
-    // Add fail test for when motorcycle has rental record
     [Fact]
     public async Task Handle_ShouldReturnFailureResult_WhenMotorcycleHasRentalRecord()
     {
@@ -109,15 +81,5 @@ public class DeleteMotorcycleCommandHandlerTests : TestHelper, IDisposable, IAsy
 
         deletedEntity.Should().NotBeNull();
         deletedEntity.IsDeleted.Should().BeTrue();
-    }
-
-    public void Dispose()
-    {
-        _dbContext.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _dbContext.DisposeAsync();
     }
 }

@@ -1,62 +1,19 @@
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Handlers;
 using Uttom.Domain.Enum;
-using Uttom.Domain.Interfaces.Abstractions;
-using Uttom.Domain.Interfaces.Repositories;
-using Uttom.Domain.Interfaces.Services;
 using Uttom.Domain.Models;
-using Uttom.Infrastructure.Implementations;
-using Uttom.Infrastructure.Repositories;
-using Uttom.Infrastructure.Services;
 using Uttom.Infrastructure.TestData;
-using Uttom.UnitTests.TestHelpers;
 
 namespace Uttom.UnitTests.Handlers;
 
 [Collection("Unit Tests")]
-public class AddDelivererCommandHandlerTests : TestHelper, IDisposable, IAsyncDisposable
+public class AddDelivererCommandHandlerTests : BaseTestHandler<AddDelivererCommandHandler>
 {
-    private readonly IUttomUnitOfWork _uttomUnitOfWork;
-    private readonly ApplicationDbContext _dbContext;
     private readonly AddDelivererCommandHandler _handler;
-    private readonly MotorcycleRepository _motorcycleRepository;
-    private readonly IRegisteredMotorCycleRepository _registeredMotorCycleRepository;
-    private readonly IDelivererRepository _delivererRepository;
-    private readonly IRentalRepository _rentalRepository;
-    private readonly IMinioService _minioService;
-    private readonly IImageService _imageService;
-    private readonly ILogger<AddDelivererCommandHandler> _logger;
-
     public AddDelivererCommandHandlerTests()
     {
-        var options = new DbContextOptionsBuilder<ApplicationDbContext>()
-            .UseInMemoryDatabase(databaseName: "TestDatabase")
-            .Options;
-
-        _dbContext = new ApplicationDbContext(options);
-        _motorcycleRepository = new MotorcycleRepository(_dbContext);
-        _registeredMotorCycleRepository = new RegisteredMotorCycleRepository(_dbContext);
-        _delivererRepository = new DelivererRepository(_dbContext);
-        _rentalRepository = new RentalRepository(_dbContext);
-
-        _minioService = new MinioService();
-        _imageService = new ImageService();
-        _logger = new Logger<AddDelivererCommandHandler>(new LoggerFactory());
-
-        _uttomUnitOfWork = new UttomUnitOfWork(_dbContext,
-            _motorcycleRepository,
-            _registeredMotorCycleRepository,
-            _delivererRepository,
-            _rentalRepository);
-
-        _handler = new AddDelivererCommandHandler(
-            _uttomUnitOfWork,
-            _minioService,
-            _imageService,
-            _logger);
+        _handler = CreateHandler(parameters: new object[]{ _uttomUnitOfWork, _minioService, _imageService, _logger} );
     }
 
     [Fact]
@@ -150,19 +107,8 @@ public class AddDelivererCommandHandlerTests : TestHelper, IDisposable, IAsyncDi
         result.Success.Should().BeTrue();
         result.ErrorMessage.Should().BeNullOrEmpty();
 
-        // check if driver license image is stored in database
         var deliverer = await _uttomUnitOfWork.DelivererRepository.GetDelivererByBusinessTaxIdAsync(command.BusinessTaxId, CancellationToken.None);
 
         deliverer.DriverLicenseImageId.Should().NotBeNullOrEmpty();
-    }
-
-    public void Dispose()
-    {
-        _dbContext.Dispose();
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        await _dbContext.DisposeAsync();
     }
 }

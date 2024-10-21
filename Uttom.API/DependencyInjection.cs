@@ -50,6 +50,23 @@ public static class DependencyInjection
         return services;
     }
 
+    public static void MigrateDatabase(IServiceProvider serviceProvider)
+    {
+        using (var scope = serviceProvider.CreateScope())
+        {
+            var services = scope.ServiceProvider;
+            try
+            {
+                var context = services.GetRequiredService<ApplicationDbContext>();
+                context.Database.Migrate();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("An error occurred while migrating the database.", ex);
+            }
+        }
+    }
+
     private static IServiceCollection RegisterMediatR(this IServiceCollection services)
     {
         services.AddMediatR(cfg =>
@@ -107,11 +124,6 @@ public static class DependencyInjection
                     Url = new Uri("https://uttom.fake")
                 }
             });
-
-            // add xml comments
-            // var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
-            // var xmlPath = Path.Combine(AppContext.BaseDirectory, xmlFile);
-            // c.IncludeXmlComments(xmlPath);
         });
 
         return services;

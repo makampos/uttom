@@ -7,6 +7,9 @@ builder.Services.AddControllers();
 builder.Services.BaseRegister(builder.Configuration);
 
 var app = builder.Build();
+
+DependencyInjection.MigrateDatabase(app.Services);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();

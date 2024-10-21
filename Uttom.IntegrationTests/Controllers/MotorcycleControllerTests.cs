@@ -7,6 +7,7 @@ using Uttom.Application.DTOs;
 using Uttom.Application.Extensions;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Queries;
+using Uttom.Domain.Enum;
 using Uttom.Domain.Interfaces.Abstractions;
 using Uttom.Domain.Messages;
 using Uttom.Domain.Results;
@@ -235,8 +236,55 @@ public class MotorcycleControllerTests : TestHelper, IClassFixture<CustomWebAppl
         result.Should().Be("Motorcycle updated successfully.");
     }
 
+    [Fact]
+    public async Task DeleteMotorcycle_Should_Return_BadRequest_When_HasRentalRecord()
+    {
+         // Arrange
+         var motorcycleCommand = new AddMotorcycleCommand(
+         Identifier: "ID1234",
+         Year: 2023,
+         Model: "ModelX",
+         PlateNumber: GeneratePlateNumber());
 
-    //TODO: Add test for when motorcycle has rental record
+         var motorcycleResponse = await _client.PostAsJsonAsync("/motos", motorcycleCommand);
+         motorcycleResponse.EnsureSuccessStatusCode();
+
+         var delivererCommand = new AddDelivererCommand(
+         "MM",
+         "Matheus",
+         GenerateDocument(DocumentType.BusinessTaxId),
+         new DateTime(1990, 1, 1),
+         GenerateDocument(DocumentType.DriverLicenseNumber),
+         1,
+         null);
+
+         var delivererResponse = await _client.PostAsJsonAsync("/entregadores", delivererCommand);
+         delivererResponse.EnsureSuccessStatusCode();
+
+         var motorcycleId = await _factory.GetMotorcycle(motorcycleCommand.PlateNumber, _factory);
+         var delivererId = await _factory.GetDeliverer(delivererCommand.BusinessTaxId, _factory);
+
+         var command = new AddRentalCommand(
+         PlanId: RentalPlans.GetPlan(7)!.Days,
+         DeliverId: delivererId.Id,
+         MotorcycleId: motorcycleId.Id,
+         StartDate: DateOnly.FromDateTime(DateTime.Today),
+         EstimatingEndingDate: DateOnly.FromDateTime(DateTime.Today.AddDays(8)));
+
+         var response = await _client.PostAsJsonAsync("/locacao", command);
+
+         response.EnsureSuccessStatusCode();
+
+         var expectedErrorMessage = JsonSerializer.Serialize(new { message = "Motorcycle has rental record." });
+
+         // Act
+         var deleteResponse = await _client.DeleteAsync($"/motos/{motorcycleId.Id}");
+         var deleteResult = await deleteResponse.Content.ReadAsStringAsync();
+
+         // Assert
+         deleteResult.Should().Be(expectedErrorMessage);
+    }
+
 
     private async Task<RegisteredMotorcycleDto> CheckMessageConsumedAsync(string plateNumber)
     {

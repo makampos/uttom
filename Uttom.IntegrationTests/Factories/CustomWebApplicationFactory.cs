@@ -6,6 +6,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Testcontainers.Minio;
 using Testcontainers.PostgreSql;
 using Testcontainers.RabbitMq;
+using Uttom.Domain.Interfaces.Abstractions;
+using Uttom.Domain.Models;
 using Uttom.Infrastructure.Implementations;
 
 namespace Uttom.IntegrationTests.Factories;
@@ -80,5 +82,19 @@ public class CustomWebApplicationFactory : WebApplicationFactory<Program>
                 dbContext.Database.Migrate();
             }
         });
+    }
+
+    public async Task<Motorcycle> GetMotorcycle(string plateNumber, CustomWebApplicationFactory _factory)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var uttomUnitOfWork = scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>();
+        return await uttomUnitOfWork.MotorcycleRepository.GetByPlateNumberAsync(plateNumber, false);
+    }
+
+    public async Task<Deliverer> GetDeliverer(string businessTaxId, CustomWebApplicationFactory _factory)
+    {
+        using var scope = _factory.Services.CreateScope();
+        var uttomUnitOfWork = scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>();
+        return await uttomUnitOfWork.DelivererRepository.GetDelivererByBusinessTaxIdAsync(businessTaxId);
     }
 }

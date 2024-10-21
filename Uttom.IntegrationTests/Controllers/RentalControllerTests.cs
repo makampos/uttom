@@ -52,8 +52,8 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
         var delivererResponse = await _client.PostAsJsonAsync("/entregadores", delivererCommand);
         delivererResponse.EnsureSuccessStatusCode();
 
-        var motorcycleId = await GetMotorcycle(motorcycleCommand.PlateNumber);
-        var delivererId = await GetDeliverer(delivererCommand.BusinessTaxId);
+        var motorcycleId = await _factory.GetMotorcycle(motorcycleCommand.PlateNumber, _factory);
+        var delivererId = await _factory.GetDeliverer(delivererCommand.BusinessTaxId, _factory);
 
 
         var command = new AddRentalCommand(
@@ -96,8 +96,8 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
         var delivererResponse = await _client.PostAsJsonAsync("/entregadores", delivererCommand);
         delivererResponse.EnsureSuccessStatusCode();
 
-        var motorcycle = await GetMotorcycle(motorcycleCommand.PlateNumber);
-        var deliverer = await GetDeliverer(delivererCommand.BusinessTaxId);
+        var motorcycle = await _factory.GetMotorcycle(motorcycleCommand.PlateNumber, _factory);
+        var deliverer = await _factory.GetDeliverer(delivererCommand.BusinessTaxId, _factory);
 
         var command = new AddRentalCommand(
             PlanId: RentalPlans.GetPlan(7)!.Days,
@@ -143,8 +143,9 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
         var delivererResponse = await _client.PostAsJsonAsync("/entregadores", delivererCommand);
         delivererResponse.EnsureSuccessStatusCode();
 
-        var motorcycle = await GetMotorcycle(motorcycleCommand.PlateNumber);
-        var deliverer = await GetDeliverer(delivererCommand.BusinessTaxId);
+
+        var motorcycle = await _factory.GetMotorcycle(motorcycleCommand.PlateNumber, _factory);
+        var deliverer = await _factory.GetDeliverer(delivererCommand.BusinessTaxId, _factory);
 
         var command = new AddRentalCommand(
             PlanId: RentalPlans.GetPlan(7)!.Days,
@@ -173,17 +174,5 @@ public class RentalControllerTests : TestHelper, IClassFixture<CustomWebApplicat
         updateResult.Should().NotBeNullOrEmpty();
     }
 
-    private async Task<Motorcycle> GetMotorcycle(string plateNumber)
-    {
-        using var scope = _factory.Services.CreateScope();
-        var uttomUnitOfWork = scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>();
-        return await uttomUnitOfWork.MotorcycleRepository.GetByPlateNumberAsync(plateNumber, false);
-    }
 
-    private async Task<Deliverer> GetDeliverer(string businessTaxId)
-    {
-        using var scope = _factory.Services.CreateScope();
-        var uttomUnitOfWork = scope.ServiceProvider.GetRequiredService<IUttomUnitOfWork>();
-        return await uttomUnitOfWork.DelivererRepository.GetDelivererByBusinessTaxIdAsync(businessTaxId);
-    }
 }

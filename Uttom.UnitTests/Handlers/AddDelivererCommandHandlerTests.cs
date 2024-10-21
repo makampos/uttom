@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Uttom.Application.Extensions;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Handlers;
@@ -27,6 +28,7 @@ public class AddDelivererCommandHandlerTests : TestHelper, IDisposable, IAsyncDi
     private readonly IRentalRepository _rentalRepository;
     private readonly IMinioService _minioService;
     private readonly IImageService _imageService;
+    private readonly ILogger<AddDelivererCommandHandler> _logger;
 
     private const string PATH = "TestData/Images";
 
@@ -44,6 +46,7 @@ public class AddDelivererCommandHandlerTests : TestHelper, IDisposable, IAsyncDi
 
         _minioService = new MinioService();
         _imageService = new ImageService();
+        _logger = new Logger<AddDelivererCommandHandler>(new LoggerFactory());
 
         _uttomUnitOfWork = new UttomUnitOfWork(_dbContext,
             _motorcycleRepository,
@@ -54,7 +57,8 @@ public class AddDelivererCommandHandlerTests : TestHelper, IDisposable, IAsyncDi
         _handler = new AddDelivererCommandHandler(
             _uttomUnitOfWork,
             _minioService,
-            _imageService);
+            _imageService,
+            _logger);
     }
 
     [Fact]

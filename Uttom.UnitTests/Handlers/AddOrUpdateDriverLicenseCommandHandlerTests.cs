@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Uttom.Application.Extensions;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Handlers;
@@ -27,6 +28,7 @@ public class AddOrUpdateDriverLicenseCommandHandlerTests : TestHelper, IDisposab
     private readonly IRentalRepository _rentalRepository;
     private readonly IMinioService _minioService;
     private readonly IImageService _imageService;
+    private readonly ILogger<AddOrUpdateDriverLicenseCommandHandler> _logger;
 
     private const string PATH = "TestData/Images";
 
@@ -43,10 +45,11 @@ public class AddOrUpdateDriverLicenseCommandHandlerTests : TestHelper, IDisposab
         _rentalRepository = new RentalRepository(_dbContext);
         _minioService = new MinioService();
         _imageService = new ImageService();
+        _logger = new Logger<AddOrUpdateDriverLicenseCommandHandler>(new LoggerFactory());
 
         _uttomUnitOfWork = new UttomUnitOfWork(_dbContext, _motorcycleRepository, _registeredMotorCycleRepository, _delivererRepository, _rentalRepository);
 
-        _handler = new AddOrUpdateDriverLicenseCommandHandler(_uttomUnitOfWork, _minioService, _imageService);
+        _handler = new AddOrUpdateDriverLicenseCommandHandler(_uttomUnitOfWork, _minioService, _imageService, _logger);
     }
 
 

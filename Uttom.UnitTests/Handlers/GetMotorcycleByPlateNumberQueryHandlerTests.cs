@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Uttom.Application.Features.Handlers;
 using Uttom.Application.Features.Queries;
 using Uttom.Domain.Interfaces.Abstractions;
@@ -21,6 +22,7 @@ public class GetMotorcycleByPlateNumberQueryHandlerTests : TestHelper, IDisposab
     private readonly IRegisteredMotorCycleRepository _registeredMotorCycleRepository;
     private readonly IDelivererRepository _delivererRepository;
     private readonly IRentalRepository _rentalRepository;
+    private readonly ILogger<GetMotorCycleByPlateNumberQueryHandler> _logger;
 
     public GetMotorcycleByPlateNumberQueryHandlerTests()
     {
@@ -33,10 +35,11 @@ public class GetMotorcycleByPlateNumberQueryHandlerTests : TestHelper, IDisposab
         _registeredMotorCycleRepository = new RegisteredMotorCycleRepository(_dbContext);
         _delivererRepository = new DelivererRepository(_dbContext);
         _rentalRepository = new RentalRepository(_dbContext);
+        _logger = new Logger<GetMotorCycleByPlateNumberQueryHandler>(new LoggerFactory());
 
         _uttomUnitOfWork = new UttomUnitOfWork(_dbContext, _motorcycleRepository, _registeredMotorCycleRepository, _delivererRepository, _rentalRepository);
 
-        _handler = new GetMotorCycleByPlateNumberQueryHandler(_uttomUnitOfWork);
+        _handler = new GetMotorCycleByPlateNumberQueryHandler(_uttomUnitOfWork, _logger);
     }
 
     [Fact]

@@ -1,5 +1,6 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Handlers;
 using Uttom.Application.Features.Queries;
@@ -23,6 +24,7 @@ public class GetTotalRentalPriceQueryHandlerTests : TestHelper, IDisposable, IAs
     private readonly IRegisteredMotorCycleRepository _registeredMotorCycleRepository;
     private readonly IDelivererRepository _delivererRepository;
     private readonly IRentalRepository _rentalRepository;
+    private readonly ILogger<GetTotalRentalPriceQueryHandler> _logger;
 
     public GetTotalRentalPriceQueryHandlerTests()
     {
@@ -35,10 +37,10 @@ public class GetTotalRentalPriceQueryHandlerTests : TestHelper, IDisposable, IAs
         _registeredMotorCycleRepository = new RegisteredMotorCycleRepository(_dbContext);
         _delivererRepository = new DelivererRepository(_dbContext);
         _rentalRepository = new RentalRepository(_dbContext);
-
+        _logger = new Logger<GetTotalRentalPriceQueryHandler>(new LoggerFactory());
         _uttomUnitOfWork = new UttomUnitOfWork(_dbContext, _motorcycleRepository, _registeredMotorCycleRepository, _delivererRepository, _rentalRepository);
 
-        _handler = new GetTotalRentalPriceQueryHandler(_uttomUnitOfWork);
+        _handler = new GetTotalRentalPriceQueryHandler(_uttomUnitOfWork, _logger);
     }
 
     [Fact]

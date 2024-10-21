@@ -1,6 +1,7 @@
 using FluentAssertions;
 using MassTransit;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using NSubstitute;
 using Uttom.Application.Features.Commands;
 using Uttom.Application.Features.Handlers;
@@ -24,6 +25,7 @@ public class AddMotorcycleCommandHandlerTests : TestHelper, IDisposable, IAsyncD
     private readonly IRegisteredMotorCycleRepository _registeredMotorCycleRepository;
     private readonly IDelivererRepository _delivererRepository;
     private readonly IRentalRepository _rentalRepository;
+    private readonly ILogger<AddMotorCycleCommandHandler> _logger;
 
     private readonly IBusControl _busControl;
 
@@ -47,7 +49,9 @@ public class AddMotorcycleCommandHandlerTests : TestHelper, IDisposable, IAsyncD
 
         _busControl = Substitute.For<IBusControl>();
 
-        _handler = new AddMotorCycleCommandHandler(_uttomUnitOfWork, _busControl);
+        _logger = new Logger<AddMotorCycleCommandHandler>(new LoggerFactory());
+
+        _handler = new AddMotorCycleCommandHandler(_uttomUnitOfWork, _busControl, _logger);
     }
 
     [Fact]

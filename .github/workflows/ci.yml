@@ -12,41 +12,41 @@ jobs:
   build:
     runs-on: ubuntu-latest
 
-    services:
-      postgres:
-        image: postgres:latest
-        env:
-          POSTGRES_USER: uttom
-          POSTGRES_PASSWORD: uttom77
-          POSTGRES_DB: uttomdb
-        ports:
-          - 5432:5432
-        options: >-
-          --health-cmd "pg_isready -U uttom"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
-      rabbitmq:
-        image: rabbitmq:3-management
-        ports:
-          - 5672:5672
-          - 15672:15672
-        env:
-          RABBITMQ_DEFAULT_USER: guest
-          RABBITMQ_DEFAULT_PASS: guest
-
-      minio:
-        image: minio/minio
-        ports:
-          - 9000:9000
-          - 9090:9090
-        env:
-          MINIO_ROOT_USER: "minioadmin"
-          MINIO_ROOT_PASSWORD: "minioadmin"
-        options: >-
-          --entrypoint minio
-          server /data
+#    services:
+#      postgres:
+#        image: postgres:latest
+#        env:
+#          POSTGRES_USER: uttom
+#          POSTGRES_PASSWORD: uttom77
+#          POSTGRES_DB: uttomdb
+#        ports:
+#          - 5432:5432
+#        options: >-
+#          --health-cmd "pg_isready -U uttom"
+#          --health-interval 10s
+#          --health-timeout 5s
+#          --health-retries 5
+#
+#      rabbitmq:
+#        image: rabbitmq:3-management
+#        ports:
+#          - 5672:5672
+#          - 15672:15672
+#        env:
+#          RABBITMQ_DEFAULT_USER: guest
+#          RABBITMQ_DEFAULT_PASS: guest
+#
+#      minio:
+#        image: minio/minio
+#        ports:
+#          - 9000:9000
+#          - 9090:9090
+#        env:
+#          MINIO_ROOT_USER: "minioadmin"
+#          MINIO_ROOT_PASSWORD: "minioadmin"
+#        options: >-
+#          --entrypoint minio
+#          server /data
 
     steps:
       - name: Checkout code
